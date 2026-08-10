@@ -6,14 +6,14 @@ export const dynamic = "force-dynamic";
 const HERO: PreviewData = {
   name: "مطعمك",
   logo: "✦",
-  status: "مفتوح الآن · طاولة ٧",
+  status: "مفتوح الآن · طاولة 7",
   cats: ["الأطباق", "المشروبات", "الحلويات"],
   cartLabel: "سلّتك · صنفان",
-  cartTotal: "١٥٬٥٠٠",
+  cartTotal: "15,500",
   items: [
-    { name: "سلطة الكينوا", desc: "أفوكادو · رمان · جوز", price: "٦٬٠٠٠", emoji: "🥗", tile: "linear-gradient(135deg,#cdeee8,#7fc9bd)" },
-    { name: "برجر أنغوس", desc: "جبن شيدر · بطاطا مقرمشة", price: "٩٬٥٠٠", emoji: "🍔", tile: "linear-gradient(135deg,#d7efe6,#86c9b4)" },
-    { name: "عصير مانجو طازج", desc: "بدون سكر مضاف", price: "٤٬٠٠٠", emoji: "🥤", tile: "linear-gradient(135deg,#cfeef0,#7cc6d6)" },
+    { name: "سلطة الكينوا", desc: "أفوكادو · رمان · جوز", price: "6,000", emoji: "🥗", tile: "linear-gradient(135deg,#cdeee8,#7fc9bd)" },
+    { name: "برجر أنغوس", desc: "جبن شيدر · بطاطا مقرمشة", price: "9,500", emoji: "🍔", tile: "linear-gradient(135deg,#d7efe6,#86c9b4)" },
+    { name: "عصير مانجو طازج", desc: "بدون سكر مضاف", price: "4,000", emoji: "🥤", tile: "linear-gradient(135deg,#cfeef0,#7cc6d6)" },
   ],
 };
 
@@ -71,21 +71,21 @@ const CORE = [
 ];
 
 const STEPS = [
-  ["نُهيّئ منيوك بعلامتك", "نُدخل أصنافك وصورك بلونك وشعارك ونطاقك الخاص."],
+  ["نُهيّئ منيو خاص بك بعلامتك", "نُدخل أصنافك وصورك بلونك وشعارك ونطاقك الخاص."],
   ["نولّد QR لكل طاولة", "رموز جاهزة للطباعة، وستيكرات NFC اختيارية للطاولات."],
   ["الزبون يطلب فيصل مطبخك", "الطلبات تصل لوحتك مرتّبةً من الطاولة إلى المطبخ."],
 ];
 
 const PLANS = [
   { name: "تجربة", price: "مجاناً", unit: "لأول شهر", feats: ["منيو QR كامل", "قسم واحد", "لوحة تحكّم", "رموز QR للطاولات"], cta: "ابدأ التجربة", featured: false },
-  { name: "المطعم", price: "٢٥٬٠٠٠", unit: "د.ع / شهرياً", feats: ["أصناف وأقسام بلا حدود", "هوية وألوان ونطاق خاص", "استقبال ومتابعة الطلبات", "منيو التابلت (PWA)", "منيو ثنائي اللغة"], cta: "ابدأ الآن", featured: true },
+  { name: "المطعم", price: "25,000", unit: "د.ع / شهرياً", feats: ["أصناف وأقسام بلا حدود", "هوية وألوان ونطاق خاص", "استقبال ومتابعة الطلبات", "منيو التابلت (PWA)", "منيو ثنائي اللغة"], cta: "ابدأ الآن", featured: true },
   { name: "السلسلة", price: "عند الطلب", unit: "لعدّة فروع", feats: ["كل مزايا «المطعم»", "فروع متعددة", "لوحة موحّدة", "دعم مخصّص"], cta: "تواصل معنا", featured: false },
 ];
 
 const ORDERS = [
-  { col: "جديد", dot: "#06b6d4", cards: [["طاولة ٧", "برجر أنغوس · عصير مانجو", "الآن"], ["طاولة ٢", "قهوة عربية ×٢", "١ د"]] },
-  { col: "قيد التحضير", dot: "#f59e0b", cards: [["طاولة ٤", "مشاوي مشكّلة", "٥ د"]] },
-  { col: "جاهز", dot: "#10b3a3", cards: [["طاولة ٩", "سلطة كينوا · فتوش", "٨ د"]] },
+  { col: "جديد", dot: "#06b6d4", cards: [["طاولة 7", "برجر أنغوس · عصير مانجو", "الآن"], ["طاولة 2", "قهوة عربية ×2", "1 د"]] },
+  { col: "قيد التحضير", dot: "#f59e0b", cards: [["طاولة 4", "مشاوي مشكّلة", "5 د"]] },
+  { col: "جاهز", dot: "#10b3a3", cards: [["طاولة 9", "سلطة كينوا · فتوش", "8 د"]] },
 ];
 
 export default function Landing() {
@@ -162,7 +162,7 @@ export default function Landing() {
 
               <div className="toast-cycle absolute -right-4 bottom-24 flex items-center gap-2 rounded-full px-4 py-2" style={{ background: "#fff", border: "1px solid var(--line)", boxShadow: "var(--shadow-lg)" }}>
                 <span className="h-2 w-2 rounded-full" style={{ background: "var(--brand)", boxShadow: "0 0 8px var(--brand)" }} />
-                <span className="text-[12px] font-bold" style={{ color: "var(--ink)" }}>طلب جديد · طاولة ٧</span>
+                <span className="text-[12px] font-bold" style={{ color: "var(--ink)" }}>طلب جديد · طاولة 7</span>
               </div>
             </div>
           </div>
@@ -186,8 +186,8 @@ export default function Landing() {
           <div className="grid grid-cols-2 gap-8 sm:grid-cols-4">
             <Reveal delay={0}><Stat symbol="∞" label="أصناف وأقسام" /></Reveal>
             <Reveal delay={80}><Stat to={2} label="لغة · عربي/إنجليزي" /></Reveal>
-            <Reveal delay={160}><Stat to={100} suffix="٪" label="من المتصفّح — بلا تطبيق" /></Reveal>
-            <Reveal delay={240}><Stat symbol="٢٤/٧" label="متاح دائماً" /></Reveal>
+            <Reveal delay={160}><Stat to={100} suffix="%" label="من المتصفّح — بلا تطبيق" /></Reveal>
+            <Reveal delay={240}><Stat symbol="24/7" label="متاح دائماً" /></Reveal>
           </div>
         </div>
       </section>
@@ -248,7 +248,7 @@ export default function Landing() {
                     {["قهوة عربية", "برجر أنغوس", "سلطة كينوا"].map((n, i) => (
                       <div key={n} className="flex items-center justify-between rounded-xl px-3 py-2 text-[12px]" style={{ background: "var(--band)", border: "1px solid var(--line)" }}>
                         <span className="font-bold" style={{ color: "var(--ink)" }}>{n}</span>
-                        <span className="brand-text font-black">{["٣٬٥٠٠", "٩٬٥٠٠", "٦٬٠٠٠"][i]}</span>
+                        <span className="brand-text font-black">{["3,500", "9,500", "6,000"][i]}</span>
                       </div>
                     ))}
                   </div>
@@ -260,7 +260,7 @@ export default function Landing() {
             <Reveal delay={80} className="md:col-span-3">
               <div className="lift h-full rounded-3xl bg-white p-7" style={{ border: "1px solid var(--line)", boxShadow: "var(--shadow-md)" }}>
                 <h3 className="text-xl font-black" style={{ color: "var(--ink)" }}>ثيمات وألوان لكل علامة</h3>
-                <p className="mt-2 text-[14px] leading-7" style={{ color: "var(--ink-soft)" }}>لون وشعار ونطاق خاص — منيوك يشبه مطعمك لا منصّتنا.</p>
+                <p className="mt-2 text-[14px] leading-7" style={{ color: "var(--ink-soft)" }}>لون وشعار ونطاق خاص — منيو خاص بك يشبه مطعمك لا منصّتنا.</p>
                 <div className="mt-5 flex gap-3">
                   {["#10b3a3", "#d18b4a", "#2f9e7a", "#3b5bdb", "#9c3b52"].map((c) => (
                     <span key={c} className="h-9 w-9 rounded-full" style={{ background: c, boxShadow: "0 6px 14px -6px rgba(0,0,0,.25)" }} />
@@ -341,7 +341,7 @@ export default function Landing() {
                 <div className="flex items-center gap-2 text-[13px] font-bold" style={{ color: "#a7d8d2" }}>
                   <span className="h-2 w-2 rounded-full" style={{ background: "var(--brand-bright)", boxShadow: "0 0 8px var(--brand-bright)" }} /> لوحة الطلبات · مباشر
                 </div>
-                <span className="rounded-full px-3 py-1 text-[12px] font-black" style={{ background: "rgba(45,212,191,.16)", color: "#c9fbf4" }}>٣ طلبات جديدة</span>
+                <span className="rounded-full px-3 py-1 text-[12px] font-black" style={{ background: "rgba(45,212,191,.16)", color: "#c9fbf4" }}>3 طلبات جديدة</span>
               </div>
               <div className="grid gap-4 sm:grid-cols-3">
                 {ORDERS.map((c) => (
@@ -382,7 +382,7 @@ export default function Landing() {
             {STEPS.map(([title, desc], i) => (
               <Reveal key={title} delay={i * 120} className="relative text-center">
                 <div className="mx-auto flex h-[74px] w-[74px] items-center justify-center rounded-full text-2xl font-black text-white" style={{ background: "var(--grad)", boxShadow: "var(--shadow-brand)" }}>
-                  {["١", "٢", "٣"][i]}
+                  {["1", "2", "3"][i]}
                 </div>
                 <h3 className="mt-5 text-[18px] font-black" style={{ color: "var(--ink)" }}>{title}</h3>
                 <p className="mx-auto mt-2 max-w-xs text-[14px] leading-7" style={{ color: "var(--ink-soft)" }}>{desc}</p>
@@ -420,7 +420,7 @@ export default function Landing() {
                   </div>
                   <div className="mt-5 flex items-end gap-2">
                     <span className="text-4xl font-black">
-                      <span className={p.price.match(/[٠-٩]/) ? "brand-text" : ""} style={p.price.match(/[٠-٩]/) ? {} : { color: "var(--ink)" }}>{p.price}</span>
+                      <span className={p.price.match(/[0-9]/) ? "brand-text" : ""} style={p.price.match(/[0-9]/) ? {} : { color: "var(--ink)" }}>{p.price}</span>
                     </span>
                     <span className="pb-1 text-[13px]" style={{ color: "var(--ink-soft)" }}>{p.unit}</span>
                   </div>

@@ -3,8 +3,6 @@
 import { useEffect, useRef, useState, type ReactNode, type CSSProperties } from "react";
 import { MenuPreview, type PreviewData } from "./MenuPreview";
 
-const toAr = (s: string | number) => String(s).replace(/[0-9]/g, (d) => "٠١٢٣٤٥٦٧٨٩"[+d]);
-
 /* ————— scroll-reveal wrapper (visible by default; hides only below-fold) ————— */
 export function Reveal({
   children,
@@ -153,7 +151,7 @@ export function Stat({ to, label, prefix = "", suffix = "", symbol }: { to?: num
       <div className="text-[clamp(2rem,5vw,3.25rem)] font-black leading-none">
         <span className="brand-text">
           {prefix}
-          {symbol ?? toAr(val)}
+          {symbol ?? val}
           {suffix}
         </span>
       </div>
@@ -174,14 +172,14 @@ const SWATCHES = [
 const YOURS: PreviewData = {
   name: "مطعمك",
   logo: "✦",
-  status: "مفتوح الآن · طاولة ١",
+  status: "مفتوح الآن · طاولة 1",
   cats: ["الأطباق", "المشروبات", "الحلويات"],
   cartLabel: "سلّتك · صنفان",
-  cartTotal: "١١٬٠٠٠",
+  cartTotal: "11,000",
   items: [
-    { name: "طبق اليوم", desc: "طازج · من مطبخنا", price: "٨٬٠٠٠", emoji: "🍽️", tile: "linear-gradient(135deg,#cdeee8,#7fc9bd)" },
-    { name: "مشروب المنزل", desc: "بارد · منعش", price: "٣٬٠٠٠", emoji: "🥤", tile: "linear-gradient(135deg,#cfeef0,#7cc6d6)" },
-    { name: "حلى خاص", desc: "صنع اليوم", price: "٤٬٥٠٠", emoji: "🍰", tile: "linear-gradient(135deg,#d9eede,#8fc79f)" },
+    { name: "طبق اليوم", desc: "طازج · من مطبخنا", price: "8,000", emoji: "🍽️", tile: "linear-gradient(135deg,#cdeee8,#7fc9bd)" },
+    { name: "مشروب المنزل", desc: "بارد · منعش", price: "3,000", emoji: "🥤", tile: "linear-gradient(135deg,#cfeef0,#7cc6d6)" },
+    { name: "حلى خاص", desc: "صنع اليوم", price: "4,500", emoji: "🍰", tile: "linear-gradient(135deg,#d9eede,#8fc79f)" },
   ],
 };
 
@@ -192,7 +190,7 @@ export function TenantSwitcher() {
       <div className="text-right">
         <p className="text-[13px] font-black tracking-wide" style={{ color: "var(--brand-deep)" }}>هوية لكل مطعم</p>
         <h2 className="mt-3 text-[clamp(1.9rem,3.6vw,3rem)] font-black leading-tight" style={{ color: "var(--ink)" }}>
-          لونك، شعارك، منيوك — <span className="brand-text">نطاقك الخاص</span>
+          لونك، شعارك، منيو خاص بك — <span className="brand-text">نطاقك الخاص</span>
         </h2>
         <p className="mt-4 max-w-md text-[15px] leading-8" style={{ color: "var(--ink-soft)" }}>
           كل مطعم على المنصّة مستقلٌّ تماماً. اختر لوناً وشاهد المنيو يُعاد طلاؤه أمامك لحظياً — نفس ما يحدث حين نُهيّئ علامتك.
@@ -238,25 +236,25 @@ export function TenantSwitcher() {
 type BoardItem = { name: string; desc: string; price: string; emoji: string };
 const BOARD: Record<string, BoardItem[]> = {
   "المشروبات الساخنة": [
-    { name: "قهوة عربية بالهيل", desc: "دلّة نحاسية · تُقدَّم مع تمر", price: "٣٬٥٠٠", emoji: "☕" },
-    { name: "إسبريسو مزدوج", desc: "تحميص متوسط", price: "٣٬٠٠٠", emoji: "☕" },
-    { name: "لاتيه بالزعفران", desc: "حليب مبخّر · زعفران إيراني", price: "٤٬٠٠٠", emoji: "🥛" },
-    { name: "شاي كرك", desc: "حليب · هيل · زنجبيل", price: "٢٬٠٠٠", emoji: "🍵" },
+    { name: "قهوة عربية بالهيل", desc: "دلّة نحاسية · تُقدَّم مع تمر", price: "3,500", emoji: "☕" },
+    { name: "إسبريسو مزدوج", desc: "تحميص متوسط", price: "3,000", emoji: "☕" },
+    { name: "لاتيه بالزعفران", desc: "حليب مبخّر · زعفران إيراني", price: "4,000", emoji: "🥛" },
+    { name: "شاي كرك", desc: "حليب · هيل · زنجبيل", price: "2,000", emoji: "🍵" },
   ],
   الحلويات: [
-    { name: "كنافة نابلسية", desc: "جبن عكاوي · قطر · فستق", price: "٥٬٠٠٠", emoji: "🍮" },
-    { name: "تشيز كيك التوت", desc: "قاعدة بسكويت · توت طازج", price: "٥٬٥٠٠", emoji: "🍰" },
-    { name: "لقيمات بالقشطة", desc: "دبس تمر · سمسم", price: "٣٬٥٠٠", emoji: "🍯" },
+    { name: "كنافة نابلسية", desc: "جبن عكاوي · قطر · فستق", price: "5,000", emoji: "🍮" },
+    { name: "تشيز كيك التوت", desc: "قاعدة بسكويت · توت طازج", price: "5,500", emoji: "🍰" },
+    { name: "لقيمات بالقشطة", desc: "دبس تمر · سمسم", price: "3,500", emoji: "🍯" },
   ],
   المشاوي: [
-    { name: "مشاوي مشكّلة", desc: "كباب · شيش طاووق · ريش", price: "١٢٬٥٠٠", emoji: "🍢" },
-    { name: "شيش طاووق", desc: "صدور دجاج متبّلة · ثوم", price: "٩٬٠٠٠", emoji: "🍗" },
-    { name: "كباب حلبي", desc: "لحم غنم · بقدونس", price: "١٠٬٠٠٠", emoji: "🥩" },
+    { name: "مشاوي مشكّلة", desc: "كباب · شيش طاووق · ريش", price: "12,500", emoji: "🍢" },
+    { name: "شيش طاووق", desc: "صدور دجاج متبّلة · ثوم", price: "9,000", emoji: "🍗" },
+    { name: "كباب حلبي", desc: "لحم غنم · بقدونس", price: "10,000", emoji: "🥩" },
   ],
   السلطات: [
-    { name: "تبولة", desc: "بقدونس · برغل · ليمون", price: "٣٬٥٠٠", emoji: "🥗" },
-    { name: "فتوش", desc: "خضار · خبز محمّص · دبس رمان", price: "٣٬٥٠٠", emoji: "🥙" },
-    { name: "حمص بيروتي", desc: "طحينة · زيت زيتون · صنوبر", price: "٣٬٠٠٠", emoji: "🫓" },
+    { name: "تبولة", desc: "بقدونس · برغل · ليمون", price: "3,500", emoji: "🥗" },
+    { name: "فتوش", desc: "خضار · خبز محمّص · دبس رمان", price: "3,500", emoji: "🥙" },
+    { name: "حمص بيروتي", desc: "طحينة · زيت زيتون · صنوبر", price: "3,000", emoji: "🫓" },
   ],
 };
 

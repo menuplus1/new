@@ -3,7 +3,7 @@ import type { CSSProperties } from "react";
 export type PreviewItem = {
   name: string;
   desc: string;
-  price: string; // Arabic-Indic, e.g. "٣٬٥٠٠"
+  price: string; // e.g. "3,500"
   emoji: string;
   tile: string; // css gradient for the food tile
 };
@@ -177,27 +177,27 @@ export function MenuPreview({
 export const DALLAH: PreviewData = {
   name: "قهوة الدلّة",
   logo: "☕",
-  status: "مفتوح الآن · طاولة ٧",
+  status: "مفتوح الآن · طاولة 7",
   cats: ["ساخنة", "باردة", "حلويات"],
   cartLabel: "سلّتك · صنفان",
-  cartTotal: "٧٬٥٠٠",
+  cartTotal: "7,500",
   items: [
-    { name: "قهوة عربية بالهيل", desc: "دلّة نحاسية · تمر", price: "٣٬٥٠٠", emoji: "☕", tile: "linear-gradient(135deg,#e9cfa8,#c58a4e)" },
-    { name: "لاتيه بالزعفران", desc: "حليب مبخّر · زعفران", price: "٤٬٠٠٠", emoji: "🥛", tile: "linear-gradient(135deg,#f0dcae,#d9a86a)" },
-    { name: "كنافة نابلسية", desc: "جبن · قطر · فستق", price: "٥٬٠٠٠", emoji: "🍮", tile: "linear-gradient(135deg,#f2c98a,#c77c3a)" },
+    { name: "قهوة عربية بالهيل", desc: "دلّة نحاسية · تمر", price: "3,500", emoji: "☕", tile: "linear-gradient(135deg,#e9cfa8,#c58a4e)" },
+    { name: "لاتيه بالزعفران", desc: "حليب مبخّر · زعفران", price: "4,000", emoji: "🥛", tile: "linear-gradient(135deg,#f0dcae,#d9a86a)" },
+    { name: "كنافة نابلسية", desc: "جبن · قطر · فستق", price: "5,000", emoji: "🍮", tile: "linear-gradient(135deg,#f2c98a,#c77c3a)" },
   ],
 };
 
 export const SHAM: PreviewData = {
   name: "مطعم بيت الشام",
   logo: "🍽️",
-  status: "مفتوح الآن · طاولة ٣",
+  status: "مفتوح الآن · طاولة 3",
   cats: ["مقبلات", "مشاوي", "أطباق"],
-  cartLabel: "سلّتك · ٣ أصناف",
-  cartTotal: "١٩٬٠٠٠",
+  cartLabel: "سلّتك · 3 أصناف",
+  cartTotal: "19,000",
   items: [
-    { name: "حمص بيروتي", desc: "طحينة · زيت زيتون", price: "٣٬٠٠٠", emoji: "🫓", tile: "linear-gradient(135deg,#d7e4b8,#8fae63)" },
-    { name: "مشاوي مشكّلة", desc: "لحم · دجاج · كباب", price: "١٢٬٥٠٠", emoji: "🍢", tile: "linear-gradient(135deg,#e7b98f,#b56a3c)" },
-    { name: "تبولة", desc: "بقدونس · برغل · ليمون", price: "٣٬٥٠٠", emoji: "🥗", tile: "linear-gradient(135deg,#cfe6a8,#7fa554)" },
+    { name: "حمص بيروتي", desc: "طحينة · زيت زيتون", price: "3,000", emoji: "🫓", tile: "linear-gradient(135deg,#d7e4b8,#8fae63)" },
+    { name: "مشاوي مشكّلة", desc: "لحم · دجاج · كباب", price: "12,500", emoji: "🍢", tile: "linear-gradient(135deg,#e7b98f,#b56a3c)" },
+    { name: "تبولة", desc: "بقدونس · برغل · ليمون", price: "3,500", emoji: "🥗", tile: "linear-gradient(135deg,#cfe6a8,#7fa554)" },
   ],
 };
