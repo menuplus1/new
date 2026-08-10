@@ -1,0 +1,11 @@
+# Deploy on Netlify (official Next.js runtime). Set the 3 Supabase env vars in the
+# site settings (Site configuration → Environment variables).
+[build]
+  command = "npm run build"
+  publish = ".next"
+
+[build.environment]
+  NODE_VERSION = "24"
+
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
