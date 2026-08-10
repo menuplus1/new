@@ -1,4 +1,4 @@
-import { Nav, Reveal, Stat, TenantSwitcher, LiveMenuBoard, Faq } from "@/components/landing/islands";
+import { Nav, Reveal, Stat, TenantSwitcher, LiveMenuBoard, Faq, ThemeSwitcher } from "@/components/landing/islands";
 import { MenuPreview, type PreviewData } from "@/components/landing/MenuPreview";
 
 export const dynamic = "force-dynamic";
@@ -46,7 +46,8 @@ function Qr({ px = 112 }: { px?: number }) {
   }
   return (
     <svg width={px} height={px} viewBox={`0 0 ${px} ${px}`} aria-hidden>
-      {rects}
+      <rect x={0} y={0} width={px} height={px} rx={px * 0.12} fill="#ffffff" />
+      <g transform={`translate(${px * 0.08}, ${px * 0.08}) scale(0.84)`}>{rects}</g>
     </svg>
   );
 }
@@ -92,16 +93,17 @@ export default function Landing() {
   return (
     <main id="top" dir="rtl">
       <Nav />
+      <ThemeSwitcher />
 
       {/* ————————————————————— HERO ————————————————————— */}
       <section className="relative overflow-hidden" style={{ background: "var(--bg)" }}>
-        <div aria-hidden className="drift pointer-events-none absolute -right-24 -top-24 h-[540px] w-[540px] rounded-full blur-3xl" style={{ background: "radial-gradient(circle, rgba(45,212,191,.38), transparent 65%)" }} />
-        <div aria-hidden className="drift-2 pointer-events-none absolute -left-32 top-24 h-[480px] w-[480px] rounded-full blur-3xl" style={{ background: "radial-gradient(circle, rgba(6,182,212,.30), transparent 65%)" }} />
+        <div aria-hidden className="drift pointer-events-none absolute -right-24 -top-24 h-[540px] w-[540px] rounded-full blur-3xl" style={{ background: "radial-gradient(circle, var(--glow), transparent 65%)" }} />
+        <div aria-hidden className="drift-2 pointer-events-none absolute -left-32 top-24 h-[480px] w-[480px] rounded-full blur-3xl" style={{ background: "radial-gradient(circle, var(--glow), transparent 65%)" }} />
         <div
           aria-hidden
           className="pointer-events-none absolute inset-0"
           style={{
-            backgroundImage: "linear-gradient(rgba(16,179,163,.05) 1px, transparent 1px), linear-gradient(90deg, rgba(16,179,163,.05) 1px, transparent 1px)",
+            backgroundImage: "linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px)",
             backgroundSize: "60px 60px",
             maskImage: "radial-gradient(75% 60% at 50% 25%, #000 0%, transparent 78%)",
             WebkitMaskImage: "radial-gradient(75% 60% at 50% 25%, #000 0%, transparent 78%)",
@@ -127,17 +129,17 @@ export default function Landing() {
                 <span>ابدأ مجاناً</span>
                 <span aria-hidden style={{ transform: "scaleX(-1)" }}>➜</span>
               </a>
-              <a href="#menu" className="inline-flex items-center gap-2 rounded-full px-7 py-4 text-[15px] font-bold" style={{ color: "var(--brand-deep)", border: "1px solid var(--line)", background: "#fff" }}>
+              <a href="#menu" className="inline-flex items-center gap-2 rounded-full px-7 py-4 text-[15px] font-bold" style={{ color: "var(--brand-deep)", border: "1px solid var(--line)", background: "var(--surface)" }}>
                 شاهد عرضاً حيّاً
               </a>
             </div>
 
             <div className="rise mt-8 flex flex-wrap items-center gap-3" style={{ animationDelay: "380ms" }}>
               <span className="text-[13px]" style={{ color: "var(--ink-soft)" }}>ادخل مطعماً حقيقياً:</span>
-              <a href="/dallah" className="lift inline-flex items-center gap-2 rounded-full px-4 py-2 text-[13px] font-bold" style={{ color: "var(--ink)", border: "1px solid var(--line)", background: "#fff" }}>
+              <a href="/dallah" className="lift inline-flex items-center gap-2 rounded-full px-4 py-2 text-[13px] font-bold" style={{ color: "var(--ink)", border: "1px solid var(--line)", background: "var(--surface)" }}>
                 <span className="h-2.5 w-2.5 rounded-full" style={{ background: "#d18b4a" }} /> قهوة الدلّة <span style={{ color: "var(--ink-soft)" }}>/dallah</span>
               </a>
-              <a href="/sham" className="lift inline-flex items-center gap-2 rounded-full px-4 py-2 text-[13px] font-bold" style={{ color: "var(--ink)", border: "1px solid var(--line)", background: "#fff" }}>
+              <a href="/sham" className="lift inline-flex items-center gap-2 rounded-full px-4 py-2 text-[13px] font-bold" style={{ color: "var(--ink)", border: "1px solid var(--line)", background: "var(--surface)" }}>
                 <span className="h-2.5 w-2.5 rounded-full" style={{ background: "#2f9e7a" }} /> بيت الشام <span style={{ color: "var(--ink-soft)" }}>/sham</span>
               </a>
             </div>
@@ -155,12 +157,12 @@ export default function Landing() {
             <div className="floaty relative mx-auto w-[min(300px,82vw)]">
               <MenuPreview accent="#10b3a3" data={HERO} />
 
-              <div className="floaty-slow absolute -left-6 top-16 rounded-2xl p-3" style={{ background: "#fff", border: "1px solid var(--line)", boxShadow: "var(--shadow-lg)" }}>
+              <div className="floaty-slow absolute -left-6 top-16 rounded-2xl p-3" style={{ background: "var(--surface)", border: "1px solid var(--line)", boxShadow: "var(--shadow-lg)" }}>
                 <Qr px={52} />
                 <div className="mt-1.5 text-center text-[9px] font-black" style={{ color: "var(--brand-deep)" }}>امسح القائمة</div>
               </div>
 
-              <div className="toast-cycle absolute -right-4 bottom-24 flex items-center gap-2 rounded-full px-4 py-2" style={{ background: "#fff", border: "1px solid var(--line)", boxShadow: "var(--shadow-lg)" }}>
+              <div className="toast-cycle absolute -right-4 bottom-24 flex items-center gap-2 rounded-full px-4 py-2" style={{ background: "var(--surface)", border: "1px solid var(--line)", boxShadow: "var(--shadow-lg)" }}>
                 <span className="h-2 w-2 rounded-full" style={{ background: "var(--brand)", boxShadow: "0 0 8px var(--brand)" }} />
                 <span className="text-[12px] font-bold" style={{ color: "var(--ink)" }}>طلب جديد · طاولة 7</span>
               </div>
@@ -173,7 +175,7 @@ export default function Landing() {
       <section className="overflow-hidden border-y py-4" style={{ background: "var(--deep)", borderColor: "rgba(255,255,255,.06)" }}>
         <div className="flex w-max marquee gap-3">
           {[...MARQUEE, ...MARQUEE].map((t, i) => (
-            <span key={i} className="inline-flex items-center gap-2 whitespace-nowrap rounded-full px-4 py-2 text-[13px] font-bold" style={{ color: "#c9fbf4", background: "rgba(45,212,191,.1)", border: "1px solid rgba(45,212,191,.2)" }}>
+            <span key={i} className="inline-flex items-center gap-2 whitespace-nowrap rounded-full px-4 py-2 text-[13px] font-bold" style={{ color: "var(--on-deep)", background: "color-mix(in srgb, var(--brand) 14%, transparent)", border: "1px solid color-mix(in srgb, var(--brand) 34%, transparent)" }}>
               <span style={{ color: "var(--brand-bright)" }}>✦</span> {t}
             </span>
           ))}
@@ -232,7 +234,7 @@ export default function Landing() {
           <div className="grid grid-cols-1 gap-5 md:grid-cols-6">
             {/* big feature */}
             <Reveal className="md:col-span-3 md:row-span-2">
-              <div className="lift flex h-full flex-col justify-between overflow-hidden rounded-3xl bg-white p-7" style={{ border: "1px solid var(--line)", boxShadow: "var(--shadow-md)" }}>
+              <div className="lift flex h-full flex-col justify-between overflow-hidden rounded-3xl surface p-7" style={{ border: "1px solid var(--line)", boxShadow: "var(--shadow-md)" }}>
                 <div>
                   <div className="inline-flex items-center gap-2 rounded-full px-3 py-1 text-[12px] font-black" style={{ background: "var(--brand-soft)", color: "var(--brand-deep)" }}>الأساس</div>
                   <h3 className="mt-4 text-2xl font-black" style={{ color: "var(--ink)" }}>منيو QR بالصور</h3>
@@ -241,7 +243,7 @@ export default function Landing() {
                   </p>
                 </div>
                 <div className="mt-6 flex items-end justify-between gap-4">
-                  <div className="rounded-2xl bg-white p-3" style={{ border: "1px solid var(--line)", boxShadow: "var(--shadow-sm)" }}>
+                  <div className="rounded-2xl surface p-3" style={{ border: "1px solid var(--line)", boxShadow: "var(--shadow-sm)" }}>
                     <Qr px={92} />
                   </div>
                   <div className="flex-1 space-y-2">
@@ -258,7 +260,7 @@ export default function Landing() {
 
             {/* themes */}
             <Reveal delay={80} className="md:col-span-3">
-              <div className="lift h-full rounded-3xl bg-white p-7" style={{ border: "1px solid var(--line)", boxShadow: "var(--shadow-md)" }}>
+              <div className="lift h-full rounded-3xl surface p-7" style={{ border: "1px solid var(--line)", boxShadow: "var(--shadow-md)" }}>
                 <h3 className="text-xl font-black" style={{ color: "var(--ink)" }}>ثيمات وألوان لكل علامة</h3>
                 <p className="mt-2 text-[14px] leading-7" style={{ color: "var(--ink-soft)" }}>لون وشعار ونطاق خاص — منيو خاص بك يشبه مطعمك لا منصّتنا.</p>
                 <div className="mt-5 flex gap-3">
@@ -271,7 +273,7 @@ export default function Landing() {
 
             {/* bilingual */}
             <Reveal delay={160} className="md:col-span-3">
-              <div className="lift h-full rounded-3xl bg-white p-7" style={{ border: "1px solid var(--line)", boxShadow: "var(--shadow-md)" }}>
+              <div className="lift h-full rounded-3xl surface p-7" style={{ border: "1px solid var(--line)", boxShadow: "var(--shadow-md)" }}>
                 <h3 className="text-xl font-black" style={{ color: "var(--ink)" }}>منيو ثنائي اللغة</h3>
                 <p className="mt-2 text-[14px] leading-7" style={{ color: "var(--ink-soft)" }}>اعرض قائمتك بالعربية والإنجليزية بلمسة واحدة.</p>
                 <div className="mt-5 inline-flex rounded-full p-1" style={{ background: "var(--band-2)" }}>
@@ -284,7 +286,7 @@ export default function Landing() {
             {/* three small */}
             {CORE.map(([icon, title, desc], i) => (
               <Reveal key={title} delay={i * 80} className="md:col-span-2">
-                <div className="lift h-full rounded-3xl bg-white p-6" style={{ border: "1px solid var(--line)", boxShadow: "var(--shadow-md)" }}>
+                <div className="lift h-full rounded-3xl surface p-6" style={{ border: "1px solid var(--line)", boxShadow: "var(--shadow-md)" }}>
                   <div className="flex h-11 w-11 items-center justify-center rounded-2xl text-xl" style={{ background: "var(--brand-soft)" }}>{icon}</div>
                   <h3 className="mt-4 text-[16px] font-black" style={{ color: "var(--ink)" }}>{title}</h3>
                   <p className="mt-2 text-[13px] leading-6" style={{ color: "var(--ink-soft)" }}>{desc}</p>
@@ -330,33 +332,33 @@ export default function Landing() {
         <div className="relative mx-auto max-w-7xl px-6 py-20 sm:py-28">
           <Reveal className="mx-auto mb-12 max-w-2xl text-center">
             <div className="flex justify-center"><Eyebrow light>إدارة الطلبات</Eyebrow></div>
-            <h2 className="mt-4 text-[clamp(1.9rem,4vw,3.1rem)] font-black leading-tight" style={{ color: "#eafffb" }}>
+            <h2 className="mt-4 text-[clamp(1.9rem,4vw,3.1rem)] font-black leading-tight" style={{ color: "var(--on-deep)" }}>
               كل طلبٍ <span className="brand-text">تحت السيطرة</span> — من الطاولة إلى المطبخ
             </h2>
           </Reveal>
 
           <Reveal delay={100}>
-            <div className="mx-auto max-w-4xl rounded-[26px] p-5 sm:p-7" style={{ background: "rgba(255,255,255,.04)", border: "1px solid rgba(45,212,191,.2)", boxShadow: "0 40px 80px -40px rgba(0,0,0,.6)" }}>
+            <div className="mx-auto max-w-4xl rounded-[26px] p-5 sm:p-7" style={{ background: "rgba(255,255,255,.04)", border: "1px solid color-mix(in srgb, var(--brand) 34%, transparent)", boxShadow: "0 40px 80px -40px rgba(0,0,0,.6)" }}>
               <div className="mb-5 flex items-center justify-between">
-                <div className="flex items-center gap-2 text-[13px] font-bold" style={{ color: "#a7d8d2" }}>
+                <div className="flex items-center gap-2 text-[13px] font-bold" style={{ color: "var(--on-deep-soft)" }}>
                   <span className="h-2 w-2 rounded-full" style={{ background: "var(--brand-bright)", boxShadow: "0 0 8px var(--brand-bright)" }} /> لوحة الطلبات · مباشر
                 </div>
-                <span className="rounded-full px-3 py-1 text-[12px] font-black" style={{ background: "rgba(45,212,191,.16)", color: "#c9fbf4" }}>3 طلبات جديدة</span>
+                <span className="rounded-full px-3 py-1 text-[12px] font-black" style={{ background: "color-mix(in srgb, var(--brand) 18%, transparent)", color: "var(--on-deep)" }}>3 طلبات جديدة</span>
               </div>
               <div className="grid gap-4 sm:grid-cols-3">
                 {ORDERS.map((c) => (
-                  <div key={c.col} className="rounded-2xl p-3" style={{ background: "rgba(255,255,255,.03)", border: "1px solid rgba(45,212,191,.12)" }}>
-                    <div className="mb-3 flex items-center gap-2 px-1 text-[13px] font-black" style={{ color: "#eafffb" }}>
+                  <div key={c.col} className="rounded-2xl p-3" style={{ background: "rgba(255,255,255,.03)", border: "1px solid color-mix(in srgb, var(--brand) 18%, transparent)" }}>
+                    <div className="mb-3 flex items-center gap-2 px-1 text-[13px] font-black" style={{ color: "var(--on-deep)" }}>
                       <span className="h-2 w-2 rounded-full" style={{ background: c.dot }} /> {c.col}
                     </div>
                     <div className="space-y-2.5">
                       {c.cards.map(([t, items, time]) => (
-                        <div key={t} className="rounded-xl p-3" style={{ background: "rgba(255,255,255,.05)", border: "1px solid rgba(45,212,191,.12)" }}>
+                        <div key={t} className="rounded-xl p-3" style={{ background: "rgba(255,255,255,.05)", border: "1px solid color-mix(in srgb, var(--brand) 18%, transparent)" }}>
                           <div className="flex items-center justify-between">
-                            <span className="text-[13px] font-black" style={{ color: "#eafffb" }}>{t}</span>
-                            <span className="text-[11px] tabular-nums" style={{ color: "#87b8b2" }}>{time}</span>
+                            <span className="text-[13px] font-black" style={{ color: "var(--on-deep)" }}>{t}</span>
+                            <span className="text-[11px] tabular-nums" style={{ color: "var(--on-deep-soft)" }}>{time}</span>
                           </div>
-                          <div className="mt-1 text-[12px]" style={{ color: "#a7d8d2" }}>{items}</div>
+                          <div className="mt-1 text-[12px]" style={{ color: "var(--on-deep-soft)" }}>{items}</div>
                         </div>
                       ))}
                     </div>
@@ -410,8 +412,8 @@ export default function Landing() {
                   className="lift flex h-full flex-col rounded-[26px] p-7"
                   style={
                     p.featured
-                      ? { background: "#fff", border: "2px solid var(--brand)", boxShadow: "0 40px 80px -34px rgba(16,179,163,.5)" }
-                      : { background: "#fff", border: "1px solid var(--line)", boxShadow: "var(--shadow-md)" }
+                      ? { background: "var(--surface)", border: "2px solid var(--brand)", boxShadow: "0 40px 80px -34px rgba(16,179,163,.5)" }
+                      : { background: "var(--surface)", border: "1px solid var(--line)", boxShadow: "var(--shadow-md)" }
                   }
                 >
                   <div className="flex items-center justify-between">
@@ -467,10 +469,10 @@ export default function Landing() {
         <div aria-hidden className="glow-pulse pointer-events-none absolute left-1/2 top-1/2 h-[380px] w-[380px] -translate-x-1/2 -translate-y-1/2 rounded-full blur-3xl" style={{ background: "radial-gradient(circle, var(--glow), transparent 68%)" }} />
         <div className="relative mx-auto max-w-3xl px-6 py-24 text-center">
           <Reveal>
-            <h2 className="text-[clamp(2rem,4.6vw,3.4rem)] font-black leading-tight" style={{ color: "#eafffb" }}>
+            <h2 className="text-[clamp(2rem,4.6vw,3.4rem)] font-black leading-tight" style={{ color: "var(--on-deep)" }}>
               جهّز <span className="brand-text">منيو مطعمك الرقمي</span> اليوم
             </h2>
-            <p className="mx-auto mt-4 max-w-lg text-[16px] leading-8" style={{ color: "#a7d8d2" }}>
+            <p className="mx-auto mt-4 max-w-lg text-[16px] leading-8" style={{ color: "var(--on-deep-soft)" }}>
               انضم إلى المطاعم التي تمنح زبائنها تجربةً أرقى — قائمة أنيقة، طلبٌ أسهل، وإدارةٌ أوضح.
             </p>
             <a href="#pricing" className="shimmer mt-9 inline-flex items-center gap-2 rounded-full px-9 py-4 text-[16px] font-bold text-white" style={{ background: "var(--grad)", boxShadow: "var(--shadow-brand)" }}>
@@ -481,7 +483,7 @@ export default function Landing() {
       </section>
 
       {/* ————————————————————— FOOTER ————————————————————— */}
-      <footer style={{ background: "#041b1a" }}>
+      <footer style={{ background: "var(--footer)" }}>
         <div className="mx-auto max-w-7xl px-6 py-14">
           <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
             <div>
@@ -489,9 +491,9 @@ export default function Landing() {
                 <span className="flex h-9 w-9 items-center justify-center rounded-[11px]" style={{ background: "var(--grad)" }}>
                   <span className="text-base font-black text-white">س</span>
                 </span>
-                <span className="text-2xl font-black" style={{ color: "#eafffb" }}>سُفرة</span>
+                <span className="text-2xl font-black" style={{ color: "var(--on-deep)" }}>سُفرة</span>
               </div>
-              <p className="mt-4 max-w-xs text-[13px] leading-7" style={{ color: "#7fb0aa" }}>
+              <p className="mt-4 max-w-xs text-[13px] leading-7" style={{ color: "var(--on-deep-soft)" }}>
                 منصّة المنيو الرقمي للمطاعم والمقاهي — قائمة QR أنيقة، بلونك ونطاقك الخاص.
               </p>
             </div>
@@ -504,14 +506,14 @@ export default function Landing() {
                 <h4 className="text-[14px] font-black" style={{ color: "var(--brand-bright)" }}>{title}</h4>
                 <ul className="mt-4 space-y-3">
                   {(links as string[]).map((l) => (
-                    <li key={l}><span className="text-[13px]" style={{ color: "#7fb0aa" }}>{l}</span></li>
+                    <li key={l}><span className="text-[13px]" style={{ color: "var(--on-deep-soft)" }}>{l}</span></li>
                   ))}
                 </ul>
               </div>
             ))}
           </div>
           <div className="my-8 rule" />
-          <div className="flex flex-col items-center justify-between gap-3 text-[12px] sm:flex-row" style={{ color: "#6b9c96" }}>
+          <div className="flex flex-col items-center justify-between gap-3 text-[12px] sm:flex-row" style={{ color: "var(--on-deep-soft)" }}>
             <span>© منصّة سُفرة — جميع الحقوق محفوظة</span>
             <span className="inline-flex items-center gap-2"><span style={{ color: "var(--brand)" }}>◆</span> صُنع بعنايةٍ للمطاعم العراقية</span>
           </div>

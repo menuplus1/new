@@ -68,7 +68,7 @@ export function Nav() {
     <header
       className="fixed inset-x-0 top-0 z-50 transition-colors duration-300"
       style={{
-        background: solid ? "rgba(255,255,255,.82)" : "transparent",
+        background: solid ? "var(--nav-bg)" : "transparent",
         backdropFilter: solid ? "blur(14px)" : "none",
         borderBottom: solid ? "1px solid var(--line)" : "1px solid transparent",
       }}
@@ -209,7 +209,7 @@ export function TenantSwitcher() {
                 style={{
                   background: s.c,
                   transform: active ? "scale(1.14)" : "scale(1)",
-                  boxShadow: active ? "0 0 0 2px #fff, 0 0 0 4px var(--brand), 0 8px 18px -6px rgba(0,0,0,.25)" : "0 4px 10px -4px rgba(0,0,0,.25)",
+                  boxShadow: active ? "0 0 0 2px var(--bg), 0 0 0 4px var(--brand), 0 8px 18px -6px rgba(0,0,0,.25)" : "0 4px 10px -4px rgba(0,0,0,.25)",
                 }}
               />
             );
@@ -264,7 +264,7 @@ export function LiveMenuBoard() {
   return (
     <div
       className="relative mx-auto max-w-3xl overflow-hidden rounded-[28px] p-6 sm:p-8"
-      style={{ background: "#fff", border: "1px solid var(--line)", boxShadow: "var(--shadow-lg)" }}
+      style={{ background: "var(--surface)", border: "1px solid var(--line)", boxShadow: "var(--shadow-lg)" }}
     >
       <div className="flex flex-wrap justify-center gap-2">
         {cats.map((c) => {
@@ -285,7 +285,7 @@ export function LiveMenuBoard() {
       <div key={active} className="rise mt-6 space-y-2.5" style={{ animationDuration: ".45s" }}>
         {BOARD[active].map((it) => (
           <div key={it.name} className="lift flex items-center gap-4 rounded-2xl p-3" style={{ background: "var(--band)", border: "1px solid var(--line)" }}>
-            <div className="flex h-14 w-14 flex-none items-center justify-center rounded-2xl text-2xl" style={{ background: "linear-gradient(135deg,#d3f0ea,#8fd0c5)" }}>
+            <div className="flex h-14 w-14 flex-none items-center justify-center rounded-2xl text-2xl" style={{ background: "linear-gradient(135deg, color-mix(in srgb, var(--brand) 22%, #fff), color-mix(in srgb, var(--brand) 50%, #fff))" }}>
               {it.emoji}
             </div>
             <div className="min-w-0 flex-1">
@@ -340,6 +340,54 @@ export function Faq() {
           </div>
         );
       })}
+    </div>
+  );
+}
+
+/* ————— live theme comparison switcher (temporary tool) ————— */
+const THEMES = [
+  { key: "turquoise", name: "فيروزي", c: "#10b3a3" },
+  { key: "indigo", name: "نيلي جوهري", c: "#6366f1" },
+  { key: "wine", name: "عاجيّ نبيذي", c: "#a12f47" },
+];
+
+export function ThemeSwitcher() {
+  const [theme, setTheme] = useState("turquoise");
+  function apply(t: string) {
+    const root = document.documentElement;
+    if (t === "turquoise") delete root.dataset.theme;
+    else root.dataset.theme = t;
+  }
+  useEffect(() => {
+    const saved = localStorage.getItem("emenu-theme") || "turquoise";
+    apply(saved);
+    setTheme(saved);
+  }, []);
+  function pick(t: string) {
+    apply(t);
+    setTheme(t);
+    localStorage.setItem("emenu-theme", t);
+  }
+  return (
+    <div
+      className="fixed bottom-4 left-4 z-[60] flex items-center gap-2 rounded-full px-3 py-2"
+      style={{ background: "var(--surface)", border: "1px solid var(--line)", boxShadow: "var(--shadow-lg)" }}
+    >
+      <span className="hidden text-[12px] font-bold sm:inline" style={{ color: "var(--ink-soft)" }}>الثيم</span>
+      {THEMES.map((t) => (
+        <button
+          key={t.key}
+          onClick={() => pick(t.key)}
+          aria-label={t.name}
+          title={t.name}
+          className="h-7 w-7 rounded-full transition-transform"
+          style={{
+            background: t.c,
+            transform: theme === t.key ? "scale(1.16)" : "scale(1)",
+            boxShadow: theme === t.key ? "0 0 0 2px var(--surface), 0 0 0 4px var(--brand)" : "0 2px 6px -2px rgba(0,0,0,.3)",
+          }}
+        />
+      ))}
     </div>
   );
 }
