@@ -1,112 +1,138 @@
 @import "tailwindcss";
 
-/* ————————————————————————————————————————————————
-   سُفرة — warm-luxury design system
-   espresso stage · gold foil · ivory/cream bands
-———————————————————————————————————————————————— */
-@theme {
-  --font-sans: var(--font-arabic), system-ui, sans-serif;
-  --font-display: var(--font-amiri), var(--font-arabic), serif;
+/* ============================================================
+   THEME TOKENS — change these to re-skin the whole platform.
+   Current: white + turquoise (فيروزي). Modern "menu system" look.
+   ============================================================ */
+:root {
+  --bg: #ffffff;
+  --band: #f0faf8;   /* very light mint section band */
+  --band-2: #e6f6f2;
+  --ink: #0c2a29;    /* deep teal-charcoal text */
+  --ink-soft: #5c7b78;
+  --line: rgba(16, 179, 163, 0.18);
 
-  --color-espresso: #17110d;
-  --color-espresso-2: #1c150f;
-  --color-espresso-3: #2a1f16;
-  --color-cream: #fbf6ec;
-  --color-cream-2: #f2e7d3;
-  --color-ink: #241b14;
-  --color-ink-soft: #6f5f4d;
-  --color-gold: #c9a24b;
-  --color-gold-deep: #8a6320;
-  --color-gold-soft: #efe0b7;
-  --color-metal: #d8b062;
+  --brand: #10b3a3;        /* turquoise */
+  --brand-deep: #0e7a72;
+  --brand-bright: #2dd4bf;
+  --brand-cyan: #06b6d4;
+  --brand-soft: #d4f3ee;
+
+  --deep: #062826;         /* dark contrast band */
+  --deep-2: #0a3a37;
+
+  --grad: linear-gradient(115deg, #14b8a6 0%, #06b6d4 100%);
+  --grad-text: linear-gradient(115deg, #0e9e91 0%, #10b3a3 40%, #06b6d4 100%);
+  --glow: rgba(20, 184, 166, 0.28);
+
+  --shadow-sm: 0 1px 2px rgba(6, 60, 56, 0.05);
+  --shadow-md: 0 1px 2px rgba(6, 60, 56, 0.05), 0 22px 50px -32px rgba(6, 60, 56, 0.4);
+  --shadow-lg: 0 40px 80px -34px rgba(6, 60, 56, 0.5);
+  --shadow-brand: 0 14px 34px -12px rgba(16, 179, 163, 0.45);
+
+  color-scheme: light;
 }
 
-:root {
-  color-scheme: light;
+@theme inline {
+  --font-sans: var(--font-tajawal), system-ui, sans-serif;
+  --color-brand: var(--brand);
+  --color-ink: var(--ink);
 }
 
 html {
   scroll-behavior: smooth;
-}
-
-body {
-  background: #fbf6ec;
-  color: #241b14;
-  font-family: var(--font-arabic), system-ui, sans-serif;
-  -webkit-font-smoothing: antialiased;
   overflow-x: hidden;
 }
 
-/* gold-foil text (headline accent word, prices, numerals) */
-.foil {
-  background: linear-gradient(115deg, #f7e7b6 0%, #d8b062 26%, #9c6f2b 50%, #e7cd8b 72%, #c99f4e 100%);
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-tajawal), system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+  max-width: 100%;
+}
+
+/* brand gradient text (headline accent word, prices, stats) */
+.brand-text {
+  background: var(--grad-text);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
   color: transparent;
 }
 
-.font-display {
-  font-family: var(--font-amiri), var(--font-arabic), serif;
-}
-
-/* brass hairline rule (instead of boxy borders) */
-.brass-rule {
+/* thin turquoise rule */
+.rule {
   height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(201, 162, 75, 0.5), transparent);
+  background: linear-gradient(90deg, transparent, var(--line), transparent);
 }
 
-/* barely-there paper grain over cream bands */
-.paper::after {
+/* glassy card */
+.glass {
+  background: rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(14px);
+  border: 1px solid var(--line);
+}
+
+/* subtle paper/mesh grain overlay */
+.grain::after {
   content: "";
   position: absolute;
   inset: 0;
   pointer-events: none;
-  opacity: 0.045;
+  opacity: 0.04;
   background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='140' height='140'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
 }
 
-/* ————— motion (CSS-first, all gated on reduced-motion) ————— */
-@keyframes sufraIn {
-  from { opacity: 0; transform: translateY(18px); }
-  to { opacity: 1; transform: none; }
-}
-.sufra-in { opacity: 0; animation: sufraIn 0.7s cubic-bezier(0.22, 1, 0.36, 1) forwards; }
+/* ————— motion ————— */
+@keyframes rise { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: none; } }
+.rise { opacity: 0; animation: rise 0.7s cubic-bezier(0.22, 1, 0.36, 1) forwards; }
 
-@keyframes sufraFloat {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-10px); }
-}
-.sufra-float { animation: sufraFloat 6s ease-in-out infinite; }
-.sufra-float-slow { animation: sufraFloat 7.5s ease-in-out infinite; }
+@keyframes floaty { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-12px); } }
+.floaty { animation: floaty 6s ease-in-out infinite; }
+.floaty-slow { animation: floaty 7.5s ease-in-out infinite; }
 
-@keyframes sufraBreathe {
-  0%, 100% { opacity: 0.8; transform: translateX(-50%) scale(1); }
-  50% { opacity: 1; transform: translateX(-50%) scale(1.06); }
-}
-.sufra-breathe { animation: sufraBreathe 7s ease-in-out infinite; }
+@keyframes glowPulse { 0%, 100% { opacity: 0.75; transform: translateX(-50%) scale(1); } 50% { opacity: 1; transform: translateX(-50%) scale(1.08); } }
+.glow-pulse { animation: glowPulse 7s ease-in-out infinite; }
 
-@keyframes sufraToast {
-  0%, 12% { opacity: 0; transform: translateY(8px); }
-  20%, 80% { opacity: 1; transform: none; }
-  92%, 100% { opacity: 0; transform: translateY(8px); }
+@keyframes drift {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(4%, -3%) scale(1.06); }
+  66% { transform: translate(-3%, 2%) scale(0.98); }
 }
-.sufra-toast { animation: sufraToast 5s ease-in-out infinite; }
+.drift { animation: drift 18s ease-in-out infinite; }
+.drift-2 { animation: drift 22s ease-in-out infinite reverse; }
 
-/* diagonal light sweep on gold pills (hover only) */
+@keyframes spinSlow { to { transform: rotate(360deg); } }
+.spin-slow { animation: spinSlow 26s linear infinite; }
+
+@keyframes toastCycle { 0%, 12% { opacity: 0; transform: translateY(8px); } 20%, 80% { opacity: 1; transform: none; } 92%, 100% { opacity: 0; transform: translateY(8px); } }
+.toast-cycle { animation: toastCycle 5s ease-in-out infinite; }
+
 .shimmer { position: relative; overflow: hidden; }
 .shimmer::after {
   content: "";
   position: absolute;
   inset: 0;
-  background: linear-gradient(115deg, transparent 30%, rgba(255, 255, 255, 0.55) 50%, transparent 70%);
+  background: linear-gradient(115deg, transparent 30%, rgba(255, 255, 255, 0.6) 50%, transparent 70%);
   transform: translateX(120%);
   transition: transform 0.7s ease;
 }
 .shimmer:hover::after { transform: translateX(-120%); }
 
-/* scroll reveal — default VISIBLE; JS adds .pre (hide) only to below-fold
-   elements, then .in (animate). If JS/observer never runs, content still shows. */
+/* hover lift + subtle tilt for cards */
+.lift { transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.35s ease; }
+.lift:hover { transform: translateY(-6px); }
+
+@keyframes marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+.marquee { animation: marquee 32s linear infinite; }
+.marquee:hover { animation-play-state: paused; }
+
+/* animated conic ring behind hero device */
+@keyframes ringSpin { to { transform: rotate(360deg); } }
+
+/* scroll reveal — visible by default; JS opts below-fold nodes into hide→animate */
 [data-reveal].pre { opacity: 0; transform: translateY(26px); }
 [data-reveal].pre.in {
   opacity: 1;
@@ -114,16 +140,8 @@ body {
   transition: opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1), transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-/* gentle logo/partner marquee */
-@keyframes marquee {
-  from { transform: translateX(0); }
-  to { transform: translateX(-50%); }
-}
-.marquee { animation: marquee 30s linear infinite; }
-.marquee:hover { animation-play-state: paused; }
-
 @media (prefers-reduced-motion: reduce) {
-  .sufra-in, .sufra-float, .sufra-float-slow, .sufra-breathe, .sufra-toast, .marquee {
+  .rise, .floaty, .floaty-slow, .glow-pulse, .drift, .drift-2, .spin-slow, .toast-cycle, .marquee {
     animation: none !important;
     opacity: 1 !important;
     transform: none !important;

@@ -1,36 +1,24 @@
 import type { Metadata } from "next";
-import { IBM_Plex_Sans_Arabic, Amiri } from "next/font/google";
+import { Tajawal } from "next/font/google";
 import "./globals.css";
 
-// Body / UI — modern, crisp Arabic sans.
-const plex = IBM_Plex_Sans_Arabic({
+// Single family across the whole platform — clean, modern, "system" feel.
+const tajawal = Tajawal({
   subsets: ["arabic", "latin"],
-  weight: ["400", "500", "600", "700"],
-  variable: "--font-arabic",
-  display: "swap",
-});
-
-// Display — calligraphic Naskh serif for headlines (the "فخم" register).
-const amiri = Amiri({
-  subsets: ["arabic", "latin"],
-  weight: ["400", "700"],
-  variable: "--font-amiri",
+  weight: ["400", "500", "700", "800", "900"],
+  variable: "--font-tajawal",
   display: "swap",
 });
 
 export const metadata: Metadata = {
-  title: "منصّة المنيو الرقمي — منيو QR فاخر للمطاعم والمقاهي",
+  title: "منصّة المنيو الرقمي — منيو QR للمطاعم والمقاهي",
   description:
-    "حوّل قائمة مطعمك إلى سُفرة رقمية أنيقة: منيو QR على كل طاولة، بلونك وشعارك ونطاقك الخاص، مع تحديث فوري للأسعار واستقبال الطلبات — بدون تطبيق.",
+    "حوّل قائمة مطعمك إلى منيو رقمي أنيق: QR على كل طاولة، بلونك وشعارك ونطاقك الخاص، مع تحديث فوري للأسعار واستقبال الطلبات — بدون تطبيق.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html
-      lang="ar"
-      dir="rtl"
-      className={`${plex.variable} ${amiri.variable} h-full antialiased`}
-    >
+    <html lang="ar" dir="rtl" className={`${tajawal.variable} h-full antialiased`}>
       <body className="min-h-full">{children}</body>
     </html>
   );

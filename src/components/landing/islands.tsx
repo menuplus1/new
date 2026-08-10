@@ -3,7 +3,9 @@
 import { useEffect, useRef, useState, type ReactNode, type CSSProperties } from "react";
 import { MenuPreview, type PreviewData } from "./MenuPreview";
 
-/* ————— scroll-reveal wrapper ————— */
+const toAr = (s: string | number) => String(s).replace(/[0-9]/g, (d) => "٠١٢٣٤٥٦٧٨٩"[+d]);
+
+/* ————— scroll-reveal wrapper (visible by default; hides only below-fold) ————— */
 export function Reveal({
   children,
   className = "",
@@ -19,12 +21,9 @@ export function Reveal({
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
-    // reduced motion or no observer support → leave visible, no animation
     if (typeof IntersectionObserver === "undefined") return;
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    // already in view on mount → leave visible (don't animate what's on screen)
     if (el.getBoundingClientRect().top < window.innerHeight * 0.85) return;
-    // below the fold → hide, then animate in when scrolled to
     el.classList.add("pre");
     const io = new IntersectionObserver(
       (entries) => {
@@ -38,7 +37,6 @@ export function Reveal({
       { threshold: 0.12, rootMargin: "0px 0px -6% 0px" },
     );
     io.observe(el);
-    // safety net: never leave content stuck invisible if the observer never fires
     const t = window.setTimeout(() => el.classList.add("in"), 2500);
     return () => {
       io.disconnect();
@@ -72,52 +70,32 @@ export function Nav() {
     <header
       className="fixed inset-x-0 top-0 z-50 transition-colors duration-300"
       style={{
-        background: solid ? "rgba(23,17,13,.85)" : "transparent",
-        backdropFilter: solid ? "blur(12px)" : "none",
-        borderBottom: solid ? "1px solid rgba(201,162,75,.22)" : "1px solid transparent",
+        background: solid ? "rgba(255,255,255,.82)" : "transparent",
+        backdropFilter: solid ? "blur(14px)" : "none",
+        borderBottom: solid ? "1px solid var(--line)" : "1px solid transparent",
       }}
     >
       <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
         <a href="#top" className="flex items-center gap-2.5">
-          <span
-            className="flex h-9 w-9 rotate-45 items-center justify-center rounded-[10px]"
-            style={{ background: "linear-gradient(140deg,#e7cd8b,#9c6f2b)", boxShadow: "0 6px 16px -6px rgba(201,162,75,.7)" }}
-          >
-            <span className="-rotate-45 text-sm font-bold" style={{ color: "#20160b" }}>
-              س
-            </span>
+          <span className="flex h-9 w-9 items-center justify-center rounded-[11px]" style={{ background: "var(--grad)", boxShadow: "var(--shadow-brand)" }}>
+            <span className="text-base font-black" style={{ color: "#fff" }}>س</span>
           </span>
-          <span className="font-display text-2xl font-bold leading-none" style={{ color: "#f6efe2" }}>
-            سُفرة
-          </span>
+          <span className="text-2xl font-black leading-none" style={{ color: solid ? "var(--ink)" : "var(--ink)" }}>سُفرة</span>
         </a>
 
         <nav className="hidden items-center gap-8 md:flex">
           {NAV_LINKS.map(([label, href]) => (
-            <a
-              key={href}
-              href={href}
-              className="text-[14px] font-medium transition-colors hover:text-white"
-              style={{ color: "rgba(246,239,226,.7)" }}
-            >
+            <a key={href} href={href} className="text-[14px] font-bold transition-colors" style={{ color: "var(--ink-soft)" }}>
               {label}
             </a>
           ))}
         </nav>
 
         <div className="flex items-center gap-3">
-          <a href="/sign-in" className="hidden text-[14px] font-medium sm:inline" style={{ color: "rgba(246,239,226,.8)" }}>
+          <a href="/sign-in" className="hidden text-[14px] font-bold sm:inline" style={{ color: "var(--ink)" }}>
             تسجيل الدخول
           </a>
-          <a
-            href="#pricing"
-            className="shimmer rounded-full px-5 py-2.5 text-[14px] font-semibold"
-            style={{
-              color: "#20160b",
-              background: "linear-gradient(115deg,#f7e7b6,#d8b062 40%,#c99f4e)",
-              boxShadow: "0 8px 22px -8px rgba(201,162,75,.6), inset 0 1px 0 rgba(255,255,255,.45)",
-            }}
-          >
+          <a href="#pricing" className="shimmer rounded-full px-5 py-2.5 text-[14px] font-bold text-white" style={{ background: "var(--grad)", boxShadow: "var(--shadow-brand)" }}>
             ابدأ الآن
           </a>
         </div>
@@ -126,13 +104,71 @@ export function Nav() {
   );
 }
 
-/* ————— live per-tenant colour switcher (proves multi-tenant theming) ————— */
+/* ————— animated count-up stat ————— */
+export function Stat({ to, label, prefix = "", suffix = "", symbol }: { to?: number; label: string; prefix?: string; suffix?: string; symbol?: string }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [val, setVal] = useState(0);
+  useEffect(() => {
+    if (symbol || to == null) return;
+    const el = ref.current;
+    if (!el) return;
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduce) {
+      setVal(to);
+      return;
+    }
+    let raf = 0;
+    let start = 0;
+    let done = false;
+    const run = (t: number) => {
+      if (!start) start = t;
+      const p = Math.min(1, (t - start) / 1200);
+      setVal(Math.round((1 - Math.pow(1 - p, 3)) * to));
+      if (p < 1) raf = requestAnimationFrame(run);
+    };
+    const begin = () => {
+      if (done) return;
+      done = true;
+      raf = requestAnimationFrame(run);
+    };
+    const io = new IntersectionObserver((entries) => {
+      if (entries[0].isIntersecting) {
+        begin();
+        io.disconnect();
+      }
+    });
+    io.observe(el);
+    // safety net: if the observer never fires, still show the final value
+    const safety = window.setTimeout(() => {
+      if (!done) setVal(to);
+    }, 2600);
+    return () => {
+      cancelAnimationFrame(raf);
+      window.clearTimeout(safety);
+      io.disconnect();
+    };
+  }, [to, symbol]);
+  return (
+    <div ref={ref} className="text-center">
+      <div className="text-[clamp(2rem,5vw,3.25rem)] font-black leading-none">
+        <span className="brand-text">
+          {prefix}
+          {symbol ?? toAr(val)}
+          {suffix}
+        </span>
+      </div>
+      <div className="mt-2 text-[13px] font-bold" style={{ color: "var(--ink-soft)" }}>{label}</div>
+    </div>
+  );
+}
+
+/* ————— live per-tenant colour switcher ————— */
 const SWATCHES = [
+  { name: "فيروزي", c: "#10b3a3" },
   { name: "بنّي", c: "#d18b4a" },
   { name: "أخضر", c: "#2f9e7a" },
   { name: "نيلي", c: "#3b5bdb" },
   { name: "نبيذي", c: "#9c3b52" },
-  { name: "ذهبي", c: "#c9a24b" },
 ];
 
 const YOURS: PreviewData = {
@@ -143,9 +179,9 @@ const YOURS: PreviewData = {
   cartLabel: "سلّتك · صنفان",
   cartTotal: "١١٬٠٠٠",
   items: [
-    { name: "طبق اليوم", desc: "طازج · من مطبخنا", price: "٨٬٠٠٠", emoji: "🍽️", tile: "linear-gradient(135deg,#f0dcae,#d9a86a)" },
-    { name: "مشروب المنزل", desc: "بارد · منعش", price: "٣٬٠٠٠", emoji: "🥤", tile: "linear-gradient(135deg,#cfe6d8,#7fb59a)" },
-    { name: "حلى خاص", desc: "صنع اليوم", price: "٤٬٥٠٠", emoji: "🍰", tile: "linear-gradient(135deg,#f2c98a,#c77c3a)" },
+    { name: "طبق اليوم", desc: "طازج · من مطبخنا", price: "٨٬٠٠٠", emoji: "🍽️", tile: "linear-gradient(135deg,#cdeee8,#7fc9bd)" },
+    { name: "مشروب المنزل", desc: "بارد · منعش", price: "٣٬٠٠٠", emoji: "🥤", tile: "linear-gradient(135deg,#cfeef0,#7cc6d6)" },
+    { name: "حلى خاص", desc: "صنع اليوم", price: "٤٬٥٠٠", emoji: "🍰", tile: "linear-gradient(135deg,#d9eede,#8fc79f)" },
   ],
 };
 
@@ -154,13 +190,11 @@ export function TenantSwitcher() {
   return (
     <div className="grid items-center gap-12 lg:grid-cols-2">
       <div className="text-right">
-        <p className="text-[13px] font-semibold tracking-wide" style={{ color: "#8a6320" }}>
-          هوية لكل مطعم
-        </p>
-        <h2 className="font-display mt-3 text-[clamp(1.9rem,3.6vw,3rem)] font-bold leading-tight" style={{ color: "#241b14" }}>
-          لونك، شعارك، منيوك — <span className="foil">نطاقك الخاص</span>
+        <p className="text-[13px] font-black tracking-wide" style={{ color: "var(--brand-deep)" }}>هوية لكل مطعم</p>
+        <h2 className="mt-3 text-[clamp(1.9rem,3.6vw,3rem)] font-black leading-tight" style={{ color: "var(--ink)" }}>
+          لونك، شعارك، منيوك — <span className="brand-text">نطاقك الخاص</span>
         </h2>
-        <p className="mt-4 max-w-md text-[15px] leading-8" style={{ color: "#6f5f4d" }}>
+        <p className="mt-4 max-w-md text-[15px] leading-8" style={{ color: "var(--ink-soft)" }}>
           كل مطعم على المنصّة مستقلٌّ تماماً. اختر لوناً وشاهد المنيو يُعاد طلاؤه أمامك لحظياً — نفس ما يحدث حين نُهيّئ علامتك.
         </p>
 
@@ -176,20 +210,18 @@ export function TenantSwitcher() {
                 className="relative h-10 w-10 rounded-full transition-transform"
                 style={{
                   background: s.c,
-                  transform: active ? "scale(1.12)" : "scale(1)",
-                  boxShadow: active
-                    ? "0 0 0 2px #fbf6ec, 0 0 0 4px #c9a24b, 0 8px 18px -6px rgba(0,0,0,.35)"
-                    : "0 4px 10px -4px rgba(0,0,0,.3)",
+                  transform: active ? "scale(1.14)" : "scale(1)",
+                  boxShadow: active ? "0 0 0 2px #fff, 0 0 0 4px var(--brand), 0 8px 18px -6px rgba(0,0,0,.25)" : "0 4px 10px -4px rgba(0,0,0,.25)",
                 }}
               />
             );
           })}
         </div>
         <div className="mt-6 flex flex-wrap items-center justify-end gap-3">
-          <a href="/dallah" className="inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-[14px] font-semibold text-white transition-transform hover:-translate-y-0.5" style={{ background: "#d18b4a" }}>
+          <a href="/dallah" className="lift inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-[14px] font-bold text-white" style={{ background: "#d18b4a" }}>
             افتح قهوة الدلّة ← /dallah
           </a>
-          <a href="/sham" className="inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-[14px] font-semibold text-white transition-transform hover:-translate-y-0.5" style={{ background: "#2f9e7a" }}>
+          <a href="/sham" className="lift inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-[14px] font-bold text-white" style={{ background: "#2f9e7a" }}>
             افتح بيت الشام ← /sham
           </a>
         </div>
@@ -233,26 +265,18 @@ export function LiveMenuBoard() {
   const [active, setActive] = useState(cats[0]);
   return (
     <div
-      className="paper relative mx-auto max-w-3xl overflow-hidden rounded-[28px] p-6 sm:p-8"
-      style={{
-        background: "linear-gradient(180deg,#fffdf8,#f7efe0)",
-        border: "1px solid rgba(201,162,75,.28)",
-        boxShadow: "0 30px 60px -30px rgba(42,32,23,.4), 0 1px 2px rgba(42,32,23,.05)",
-      }}
+      className="relative mx-auto max-w-3xl overflow-hidden rounded-[28px] p-6 sm:p-8"
+      style={{ background: "#fff", border: "1px solid var(--line)", boxShadow: "var(--shadow-lg)" }}
     >
-      <div className="relative z-10 flex flex-wrap justify-center gap-2">
+      <div className="flex flex-wrap justify-center gap-2">
         {cats.map((c) => {
           const on = c === active;
           return (
             <button
               key={c}
               onClick={() => setActive(c)}
-              className="relative rounded-full px-4 py-2 text-[13px] font-semibold transition-colors"
-              style={
-                on
-                  ? { background: "linear-gradient(115deg,#d8b062,#9c6f2b)", color: "#20160b" }
-                  : { background: "rgba(201,162,75,.1)", color: "#8a6320" }
-              }
+              className="rounded-full px-4 py-2 text-[13px] font-bold transition-colors"
+              style={on ? { background: "var(--grad)", color: "#fff" } : { background: "var(--brand-soft)", color: "var(--brand-deep)" }}
             >
               {c}
             </button>
@@ -260,40 +284,22 @@ export function LiveMenuBoard() {
         })}
       </div>
 
-      <div key={active} className="sufra-in relative z-10 mt-6 space-y-2.5" style={{ animationDuration: ".45s" }}>
+      <div key={active} className="rise mt-6 space-y-2.5" style={{ animationDuration: ".45s" }}>
         {BOARD[active].map((it) => (
-          <div
-            key={it.name}
-            className="flex items-center gap-4 rounded-2xl bg-white p-3"
-            style={{ border: "1px solid #efe5d3", boxShadow: "0 1px 2px rgba(42,32,23,.04)" }}
-          >
-            <div
-              className="flex h-14 w-14 flex-none items-center justify-center rounded-2xl text-2xl"
-              style={{ background: "linear-gradient(135deg,#f3e2be,#d9a86a)" }}
-            >
+          <div key={it.name} className="lift flex items-center gap-4 rounded-2xl p-3" style={{ background: "var(--band)", border: "1px solid var(--line)" }}>
+            <div className="flex h-14 w-14 flex-none items-center justify-center rounded-2xl text-2xl" style={{ background: "linear-gradient(135deg,#d3f0ea,#8fd0c5)" }}>
               {it.emoji}
             </div>
             <div className="min-w-0 flex-1">
-              <div className="text-[15px] font-bold" style={{ color: "#2a2017" }}>
-                {it.name}
-              </div>
-              <div className="text-[12px]" style={{ color: "#9a8a74" }}>
-                {it.desc}
-              </div>
+              <div className="text-[15px] font-black" style={{ color: "var(--ink)" }}>{it.name}</div>
+              <div className="text-[12px]" style={{ color: "var(--ink-soft)" }}>{it.desc}</div>
             </div>
             <div className="flex items-center gap-3">
-              <span className="text-[15px] font-bold">
-                <span className="foil">{it.price}</span>
-                <span className="ms-1 text-[10px]" style={{ color: "#b9a781" }}>
-                  د.ع
-                </span>
+              <span className="text-[15px] font-black">
+                <span className="brand-text">{it.price}</span>
+                <span className="ms-1 text-[10px]" style={{ color: "#9aa8a5" }}>د.ع</span>
               </span>
-              <span
-                className="flex h-8 w-8 items-center justify-center rounded-full text-lg text-white"
-                style={{ background: "linear-gradient(140deg,#c9a24b,#8a6320)" }}
-              >
-                +
-              </span>
+              <span className="flex h-8 w-8 items-center justify-center rounded-full text-lg text-white" style={{ background: "var(--grad)" }}>+</span>
             </div>
           </div>
         ))}
@@ -318,34 +324,19 @@ export function Faq() {
       {FAQ.map(([q, a], i) => {
         const on = i === open;
         return (
-          <div key={q} className="border-b" style={{ borderColor: "rgba(201,162,75,.25)" }}>
-            <button
-              onClick={() => setOpen(on ? -1 : i)}
-              className="flex w-full items-center justify-between gap-4 py-5 text-right"
-              aria-expanded={on}
-            >
-              <span className="text-[16px] font-semibold" style={{ color: "#241b14" }}>
-                {q}
-              </span>
+          <div key={q} className="border-b" style={{ borderColor: "var(--line)" }}>
+            <button onClick={() => setOpen(on ? -1 : i)} className="flex w-full items-center justify-between gap-4 py-5 text-right" aria-expanded={on}>
+              <span className="text-[16px] font-black" style={{ color: "var(--ink)" }}>{q}</span>
               <span
                 className="flex h-7 w-7 flex-none items-center justify-center rounded-full text-lg transition-transform duration-300"
-                style={{
-                  background: "rgba(201,162,75,.14)",
-                  color: "#8a6320",
-                  transform: on ? "rotate(45deg)" : "none",
-                }}
+                style={{ background: "var(--brand-soft)", color: "var(--brand-deep)", transform: on ? "rotate(45deg)" : "none" }}
               >
                 +
               </span>
             </button>
-            <div
-              className="grid transition-all duration-300 ease-out"
-              style={{ gridTemplateRows: on ? "1fr" : "0fr" }}
-            >
+            <div className="grid transition-all duration-300 ease-out" style={{ gridTemplateRows: on ? "1fr" : "0fr" }}>
               <div className="overflow-hidden">
-                <p className="pb-5 text-[15px] leading-8" style={{ color: "#6f5f4d" }}>
-                  {a}
-                </p>
+                <p className="pb-5 text-[15px] leading-8" style={{ color: "var(--ink-soft)" }}>{a}</p>
               </div>
             </div>
           </div>

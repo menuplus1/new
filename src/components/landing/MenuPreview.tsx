@@ -18,8 +18,6 @@ export type PreviewData = {
   cartTotal: string;
 };
 
-const GOLD = "linear-gradient(115deg,#d8b062,#9c6f2b)";
-
 /**
  * Image-free device rendering a live mini-menu, fully recolored by `accent`
  * through a single --tenant CSS var (color-mix). Powers the hero phone, the
@@ -42,16 +40,16 @@ export function MenuPreview({
   return (
     <div
       className={className}
-      style={{ ...vars, width: wide ? "100%" : 300, ...style }}
+      style={{ ...vars, width: wide ? "100%" : "min(300px, 82vw)", ...style }}
     >
       {/* device shell */}
       <div
         className={wide ? "relative rounded-[30px] p-3" : "relative rounded-[44px] p-3"}
         style={{
-          background: "linear-gradient(160deg,#241a12,#0f0a07)",
-          border: "1px solid rgba(201,162,75,.28)",
+          background: "linear-gradient(160deg,#14201f,#080f0f)",
+          border: "1px solid rgba(16,179,163,.28)",
           boxShadow:
-            "0 40px 80px -22px rgba(0,0,0,.7), 0 0 0 1px rgba(0,0,0,.4), inset 0 1px 0 rgba(255,255,255,.06)",
+            "0 40px 80px -22px rgba(0,0,0,.55), 0 0 0 1px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.06)",
         }}
       >
         {!wide && (
@@ -139,17 +137,8 @@ export function MenuPreview({
                 </div>
                 <div className="flex flex-col items-center gap-1">
                   <span className="text-[13px] font-bold">
-                    <span
-                      style={{
-                        background: GOLD,
-                        WebkitBackgroundClip: "text",
-                        backgroundClip: "text",
-                        WebkitTextFillColor: "transparent",
-                      }}
-                    >
-                      {it.price}
-                    </span>
-                    <span className="ms-0.5 text-[9px]" style={{ color: "#b9a781" }}>
+                    <span style={{ color: "color-mix(in srgb, var(--tenant) 72%, #0c2a29)" }}>{it.price}</span>
+                    <span className="ms-0.5 text-[9px]" style={{ color: "#9aa8a5" }}>
                       د.ع
                     </span>
                   </span>
