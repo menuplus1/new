@@ -1,4 +1,4 @@
-import { Nav, Reveal, Stat, TenantSwitcher, LiveMenuBoard, Faq, ThemeSwitcher } from "@/components/landing/islands";
+import { Nav, Reveal, Stat, TenantSwitcher, LiveMenuBoard, Faq, ThemeSwitcher, Pricing } from "@/components/landing/islands";
 import { MenuPreview, type PreviewData } from "@/components/landing/MenuPreview";
 
 export const dynamic = "force-dynamic";
@@ -77,19 +77,166 @@ const STEPS = [
   ["الزبون يطلب فيصل مطبخك", "الطلبات تصل لوحتك مرتّبةً من الطاولة إلى المطبخ."],
 ];
 
-const PLANS = [
-  { name: "تجربة", price: "مجاناً", unit: "لأول شهر", feats: ["منيو QR كامل", "قسم واحد", "لوحة تحكّم", "رموز QR للطاولات"], cta: "ابدأ التجربة", featured: false },
-  { name: "المطعم", price: "25,000", unit: "د.ع / شهرياً", feats: ["أصناف وأقسام بلا حدود", "هوية وألوان ونطاق خاص", "استقبال ومتابعة الطلبات", "منيو التابلت (PWA)", "منيو ثنائي اللغة"], cta: "ابدأ الآن", featured: true },
-  { name: "السلسلة", price: "عند الطلب", unit: "لعدّة فروع", feats: ["كل مزايا «المطعم»", "فروع متعددة", "لوحة موحّدة", "دعم مخصّص"], cta: "تواصل معنا", featured: false },
-];
-
 const ORDERS = [
   { col: "جديد", dot: "#06b6d4", cards: [["طاولة 7", "برجر أنغوس · عصير مانجو", "الآن"], ["طاولة 2", "قهوة عربية ×2", "1 د"]] },
   { col: "قيد التحضير", dot: "#f59e0b", cards: [["طاولة 4", "مشاوي مشكّلة", "5 د"]] },
   { col: "جاهز", dot: "#10b3a3", cards: [["طاولة 9", "سلطة كينوا · فتوش", "8 د"]] },
 ];
 
+/* ————— deep-feature mockups (pure CSS, no images) ————— */
+const CARD = { background: "var(--surface)", border: "1px solid var(--line)", boxShadow: "var(--shadow-sm)" };
+
+function StatsMock() {
+  return (
+    <div className="space-y-3">
+      <div className="flex items-center justify-between rounded-2xl p-4" style={CARD}>
+        <span className="flex h-10 w-10 items-center justify-center rounded-full text-lg" style={{ background: "var(--brand-soft)" }}>👥</span>
+        <div className="text-left">
+          <div className="text-2xl font-black" style={{ color: "var(--ink)" }}>3,452</div>
+          <div className="text-[12px]" style={{ color: "var(--ink-soft)" }}>عدد الزيارات</div>
+        </div>
+        <span className="rounded-full px-2.5 py-1 text-[12px] font-black" style={{ background: "var(--brand-soft)", color: "var(--brand-deep)" }}>↗ 25%</span>
+      </div>
+      <div className="rounded-2xl p-4" style={CARD}>
+        <div className="mb-3 text-[13px] font-black" style={{ color: "var(--ink)" }}>الأقسام الأعلى زيارة</div>
+        {[["المشاوي", "3,532", true], ["المقبلات", "1,532", true], ["المشروبات الساخنة", "532", true], ["الحلويات", "481", false]].map(([n, v, up]) => (
+          <div key={n as string} className="flex items-center justify-between border-t py-2 text-[13px]" style={{ borderColor: "var(--line)" }}>
+            <span style={{ color: "var(--ink)" }}>{n as string}</span>
+            <span className="flex items-center gap-2">
+              <span className="font-black" style={{ color: "var(--ink)" }}>{v as string}</span>
+              <span className="text-[12px] font-black" style={{ color: up ? "var(--brand-deep)" : "#e05a5a" }}>{up ? "↗" : "↘"}</span>
+            </span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function OrdersMock() {
+  return (
+    <div className="space-y-3">
+      {[
+        ["#1245", "برجر دجاج · كولا · بيتزا", "14,000", "جديد", "var(--brand-soft)"],
+        ["#1244", "مشاوي مشكّلة", "20,000", "قيد التحضير", "rgba(245,158,11,.18)"],
+        ["#1243", "قهوة عربية ×2", "5,000", "تم التوصيل", "rgba(16,179,163,.18)"],
+      ].map(([id, items, total, status, bg]) => (
+        <div key={id} className="flex items-center justify-between gap-3 rounded-2xl px-4 py-3" style={CARD}>
+          <span className="text-[13px] font-black" style={{ color: "var(--ink-soft)" }}>{id}</span>
+          <span className="min-w-0 flex-1 truncate text-[13px]" style={{ color: "var(--ink)" }}>{items}</span>
+          <span className="whitespace-nowrap text-[13px] font-black" style={{ color: "var(--ink)" }}>{total} د.ع</span>
+          <span className="whitespace-nowrap rounded-full px-3 py-1 text-[12px] font-black" style={{ background: bg, color: "var(--brand-deep)" }}>{status}</span>
+        </div>
+      ))}
+      <div className="rounded-2xl p-4" style={CARD}>
+        <div className="mb-3 text-[13px] font-black" style={{ color: "var(--ink)" }}>حدّد طريقة الطلب</div>
+        {[["🛵", "توصيل", true], ["🥡", "استلام من الفرع", false], ["🍽️", "طلب من الطاولة", false]].map(([icon, label, on]) => (
+          <div key={label as string} className="flex items-center justify-between border-t py-2.5 text-[13px]" style={{ borderColor: "var(--line)" }}>
+            <span className="flex items-center gap-2" style={{ color: "var(--ink)" }}><span>{icon as string}</span>{label as string}</span>
+            <span className="flex h-5 w-5 items-center justify-center rounded-full text-[11px] text-white" style={{ background: on ? "var(--grad)" : "transparent", border: on ? "none" : "1px solid var(--line)" }}>{on ? "✓" : ""}</span>
+          </div>
+        ))}
+      </div>
+      <div className="flex items-center gap-2 rounded-2xl px-4 py-3 text-[13px]" style={CARD}>
+        <span>💬</span>
+        <span style={{ color: "var(--ink-soft)" }}>إشعار واتساب: <span style={{ color: "var(--ink)" }}>طلب جديد #1245 — طاولة 7</span></span>
+      </div>
+    </div>
+  );
+}
+
+function CatalogMock() {
+  return (
+    <div className="space-y-2.5">
+      {[["المشاوي", "منشور", true], ["المشروبات الساخنة", "منشور", true], ["الأكثر طلباً", "منشور", true], ["الحلويات", "معطّل", false]].map(([name, state, on]) => (
+        <div key={name as string} className="flex items-center gap-3 rounded-2xl px-4 py-3" style={CARD}>
+          <span className="text-[15px]" style={{ color: "var(--ink-soft)" }}>≡</span>
+          <span className="flex-1 text-[13.5px] font-black" style={{ color: "var(--ink)" }}>{name as string}</span>
+          <span className="flex items-center gap-2 rounded-full px-2.5 py-1 text-[12px] font-black" style={{ background: on ? "var(--brand-soft)" : "var(--band-2)", color: on ? "var(--brand-deep)" : "var(--ink-soft)" }}>
+            {state as string}
+            <span className="h-2.5 w-2.5 rounded-full" style={{ background: on ? "var(--brand)" : "var(--ink-soft)" }} />
+          </span>
+          <span className="text-[13px]" style={{ color: "var(--ink-soft)" }}>✎</span>
+          <span className="text-[13px]" style={{ color: "var(--ink-soft)" }}>🗑</span>
+        </div>
+      ))}
+      <div className="flex items-center gap-3 rounded-2xl p-3" style={CARD}>
+        <span className="flex h-12 w-12 items-center justify-center rounded-xl text-xl" style={{ background: "var(--brand-soft)" }}>🍢</span>
+        <div className="min-w-0 flex-1">
+          <div className="text-[13.5px] font-black" style={{ color: "var(--ink)" }}>شيش طاووق</div>
+          <div className="truncate text-[12px]" style={{ color: "var(--ink-soft)" }}>صدر دجاج متبّل · خبز · صلصة</div>
+        </div>
+        <span className="brand-text whitespace-nowrap text-[13px] font-black">9,000 – 14,000 د.ع</span>
+      </div>
+    </div>
+  );
+}
+
+function BrandMock() {
+  return (
+    <div className="space-y-3">
+      <div className="relative overflow-hidden rounded-2xl p-6 text-center" style={{ background: "linear-gradient(120deg,#ffd166,#ef476f)" }}>
+        <span className="absolute right-3 top-3 flex h-7 w-7 items-center justify-center rounded-lg bg-black/70 text-[12px] text-white">✎</span>
+        <div className="text-3xl font-black text-white drop-shadow">خصم 50%</div>
+        <div className="mt-1 text-[13px] font-bold text-white/90">غلاف الحملة — تغيّره متى شئت</div>
+      </div>
+      <div className="flex items-center justify-between rounded-2xl px-4 py-3" style={CARD}>
+        <span className="text-[13px] font-black" style={{ color: "var(--ink)" }}>اللون الأساسي للهوية</span>
+        <span className="flex items-center gap-2 text-[13px]" style={{ color: "var(--ink-soft)" }}>
+          #074942 <span className="h-6 w-6 rounded-full" style={{ background: "#074942" }} />
+        </span>
+      </div>
+      <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl px-4 py-3" style={CARD}>
+        <span className="flex items-center gap-2 text-[13px] font-black" style={{ color: "var(--ink)" }}>🌐 لغة ظهور المنيو</span>
+        <span className="flex gap-2">
+          {[["العربية", true], ["English", false], ["کوردی", false]].map(([l, on]) => (
+            <span key={l as string} className="rounded-full px-3 py-1 text-[12px] font-black" style={on ? { background: "var(--grad)", color: "#fff" } : { border: "1px solid var(--line)", color: "var(--ink-soft)" }}>{l as string}</span>
+          ))}
+        </span>
+      </div>
+      <div className="flex items-center gap-3 rounded-2xl px-4 py-3" style={CARD}>
+        <span className="flex h-10 w-10 items-center justify-center rounded-xl text-[13px] font-black text-white" style={{ background: "var(--grad)" }}>م</span>
+        <span className="text-[13px]" style={{ color: "var(--ink-soft)" }}>الشعار · روابط إنستغرام وواتساب وفيسبوك</span>
+      </div>
+    </div>
+  );
+}
+
+const DEEP = [
+  {
+    eyebrow: "الأرقام",
+    title: "احصائيات لمتابعة النمو",
+    body: ["من أجل متابعة نموّك قمنا برصد الزيارات لك ولأقسامك ومنتجاتك، لتتمكّن من التطوير والمتابعة المستمرة، والتحسين بناءً على الأرقام."],
+    mock: StatsMock,
+  },
+  {
+    eyebrow: "الطلبات",
+    title: "تابع الطلبات بسهولة",
+    body: ["استقبل طلبات عملائك بسهولة من الطاولة أو للاستلام أو للتوصيل، مع إمكانية متابعة حالة كل طلب وتحديثها مباشرة، بالإضافة إلى استلام إشعارات الطلب على رقمك عبر الواتساب لضمان تجربة إدارة سلسة."],
+    mock: OrdersMock,
+  },
+  {
+    eyebrow: "المنيو",
+    title: "تحكّم بالكامل بالأقسام والعناصر",
+    body: [
+      "أضف الأقسام وتحكّم بترتيبها لتظهر بالقائمة وتسهّل على المستخدم الوصول لطلبه، وأضف العناصر بكل مرونة وسهولة مع التحكّم بالأسعار والأوصاف والصور المرفقة.",
+      "يمكنك أيضاً إخفاء عناصر عن القائمة في حال عدم توفّرها أو انتهاء صلاحيتها.",
+    ],
+    mock: CatalogMock,
+  },
+  {
+    eyebrow: "الهوية",
+    title: "تحكّم بشكل ظهورك",
+    body: [
+      "خصّص الهوية البصرية من خلال تغيير الألوان والشعار والغلاف، واربطها مع وسائل التواصل الاجتماعي المختلفة.",
+      "يمكّنك الغلاف من عرض صور لمنتج جديد أو دعم حملة تخفيضات معيّنة، وابتكر الطرق المناسبة لك للعرض. كما يمكنك تخصيص عرض المنيو بلغات مختلفة مثل العربية والإنجليزية والكردية.",
+    ],
+    mock: BrandMock,
+  },
+];
+
 export default function Landing() {
+
   return (
     <main id="top" dir="rtl">
       <Nav />
@@ -113,7 +260,7 @@ export default function Landing() {
         <div className="relative mx-auto grid max-w-7xl grid-cols-1 items-center gap-14 px-6 pb-24 pt-36 lg:grid-cols-[1.05fr_.95fr] lg:pt-40">
           <div className="text-right">
             <div className="rise" style={{ animationDelay: "40ms" }}>
-              <Eyebrow>منصّة المنيو الرقمي · للمطاعم والمقاهي</Eyebrow>
+              <Eyebrow>منيو بلس · menuplus.rest</Eyebrow>
             </div>
 
             <h1 className="rise mt-6 text-[clamp(2.5rem,5.6vw,4.5rem)] font-black leading-[1.12]" style={{ animationDelay: "130ms", color: "var(--ink)" }}>
@@ -297,6 +444,28 @@ export default function Landing() {
         </div>
       </section>
 
+      {/* ————————————————————— DEEP FEATURES ————————————————————— */}
+      <section className="relative" style={{ background: "var(--bg)" }}>
+        <div className="mx-auto max-w-7xl space-y-20 px-6 py-20 sm:space-y-28 sm:py-28">
+          {DEEP.map(({ eyebrow, title, body, mock: Mock }, i) => (
+            <Reveal key={title}>
+              <div className={`grid items-center gap-12 lg:grid-cols-2 ${i % 2 ? "lg:[&>*:first-child]:order-last" : ""}`}>
+                <div className="text-right">
+                  <Eyebrow>{eyebrow}</Eyebrow>
+                  <h2 className="mt-4 text-[clamp(1.6rem,3.2vw,2.5rem)] font-black leading-tight" style={{ color: "var(--ink)" }}>{title}</h2>
+                  {body.map((p) => (
+                    <p key={p} className="mt-4 max-w-lg text-[15px] leading-8" style={{ color: "var(--ink-soft)" }}>{p}</p>
+                  ))}
+                </div>
+                <div className="rounded-[26px] p-5 sm:p-7" style={{ background: "var(--band)", border: "1px solid var(--line)", boxShadow: "var(--shadow-md)" }}>
+                  <Mock />
+                </div>
+              </div>
+            </Reveal>
+          ))}
+        </div>
+      </section>
+
       {/* ————————————————————— TABLET / PWA ————————————————————— */}
       <section className="relative" style={{ background: "var(--bg)" }}>
         <div className="mx-auto grid max-w-7xl items-center gap-14 px-6 py-20 sm:py-28 lg:grid-cols-2">
@@ -405,49 +574,10 @@ export default function Landing() {
             <p className="mt-4 text-[15px]" style={{ color: "var(--ink-soft)" }}>ابدأ مجاناً — بدون بطاقة ائتمانية.</p>
           </Reveal>
 
-          <div className="grid items-stretch gap-6 lg:grid-cols-3">
-            {PLANS.map((p, i) => (
-              <Reveal key={p.name} delay={i * 90} className={p.featured ? "lg:-mt-3" : ""}>
-                <div
-                  className="lift flex h-full flex-col rounded-[26px] p-7"
-                  style={
-                    p.featured
-                      ? { background: "var(--surface)", border: "2px solid var(--brand)", boxShadow: "0 40px 80px -34px rgba(16,179,163,.5)" }
-                      : { background: "var(--surface)", border: "1px solid var(--line)", boxShadow: "var(--shadow-md)" }
-                  }
-                >
-                  <div className="flex items-center justify-between">
-                    <h3 className="text-2xl font-black" style={{ color: "var(--ink)" }}>{p.name}</h3>
-                    {p.featured && <span className="rounded-full px-3 py-1 text-[11px] font-black text-white" style={{ background: "var(--grad)" }}>الأكثر طلباً</span>}
-                  </div>
-                  <div className="mt-5 flex items-end gap-2">
-                    <span className="text-4xl font-black">
-                      <span className={p.price.match(/[0-9]/) ? "brand-text" : ""} style={p.price.match(/[0-9]/) ? {} : { color: "var(--ink)" }}>{p.price}</span>
-                    </span>
-                    <span className="pb-1 text-[13px]" style={{ color: "var(--ink-soft)" }}>{p.unit}</span>
-                  </div>
-                  <div className="my-6 rule" />
-                  <ul className="flex-1 space-y-3">
-                    {p.feats.map((f) => (
-                      <li key={f} className="flex items-center gap-3 text-[14px]" style={{ color: "var(--ink)" }}>
-                        <span className="flex h-5 w-5 flex-none items-center justify-center rounded-full text-[11px] text-white" style={{ background: "var(--grad)" }}>✓</span>
-                        {f}
-                      </li>
-                    ))}
-                  </ul>
-                  <a
-                    href="#top"
-                    className={`mt-7 rounded-full py-3.5 text-center text-[15px] font-bold ${p.featured ? "shimmer text-white" : ""}`}
-                    style={p.featured ? { background: "var(--grad)", boxShadow: "var(--shadow-brand)" } : { color: "var(--brand-deep)", border: "1px solid var(--brand)" }}
-                  >
-                    {p.cta}
-                  </a>
-                </div>
-              </Reveal>
-            ))}
-          </div>
+          <Pricing />
         </div>
       </section>
+
 
       {/* ————————————————————— FAQ ————————————————————— */}
       <section id="faq" className="relative" style={{ background: "var(--bg)" }}>
@@ -489,12 +619,12 @@ export default function Landing() {
             <div>
               <div className="flex items-center gap-2.5">
                 <span className="flex h-9 w-9 items-center justify-center rounded-[11px]" style={{ background: "var(--grad)" }}>
-                  <span className="text-base font-black text-white">س</span>
+                  <span className="text-lg font-black text-white">+</span>
                 </span>
-                <span className="text-2xl font-black" style={{ color: "var(--on-deep)" }}>سُفرة</span>
+                <span className="text-2xl font-black" style={{ color: "var(--on-deep)" }}>منيو بلس</span>
               </div>
               <p className="mt-4 max-w-xs text-[13px] leading-7" style={{ color: "var(--on-deep-soft)" }}>
-                منصّة المنيو الرقمي للمطاعم والمقاهي — قائمة QR أنيقة، بلونك ونطاقك الخاص.
+                منيو بلس — منصّة المنيو الرقمي للمطاعم والمقاهي: قائمة QR أنيقة، طلبات وحجوزات، بلونك ونطاقك الخاص.
               </p>
             </div>
             {[
@@ -514,7 +644,7 @@ export default function Landing() {
           </div>
           <div className="my-8 rule" />
           <div className="flex flex-col items-center justify-between gap-3 text-[12px] sm:flex-row" style={{ color: "var(--on-deep-soft)" }}>
-            <span>© منصّة سُفرة — جميع الحقوق محفوظة</span>
+            <span>© منيو بلس · menuplus.rest — جميع الحقوق محفوظة</span>
             <span className="inline-flex items-center gap-2"><span style={{ color: "var(--brand)" }}>◆</span> صُنع بعنايةٍ للمطاعم العراقية</span>
           </div>
         </div>

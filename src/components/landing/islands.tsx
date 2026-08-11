@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState, type ReactNode, type CSSProperties } from "react";
 import { MenuPreview, type PreviewData } from "./MenuPreview";
+import { PLAN_INFO, YEARLY_MONTHS, iqd } from "@/lib/plans";
 
 /* ————— scroll-reveal wrapper (visible by default; hides only below-fold) ————— */
 export function Reveal({
@@ -76,9 +77,9 @@ export function Nav() {
       <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
         <a href="#top" className="flex items-center gap-2.5">
           <span className="flex h-9 w-9 items-center justify-center rounded-[11px]" style={{ background: "var(--grad)", boxShadow: "var(--shadow-brand)" }}>
-            <span className="text-base font-black" style={{ color: "#fff" }}>س</span>
+            <span className="text-lg font-black" style={{ color: "#fff" }}>+</span>
           </span>
-          <span className="text-2xl font-black leading-none" style={{ color: solid ? "var(--ink)" : "var(--ink)" }}>سُفرة</span>
+          <span className="text-2xl font-black leading-none" style={{ color: solid ? "var(--ink)" : "var(--ink)" }}>منيو بلس</span>
         </a>
 
         <nav className="hidden items-center gap-8 md:flex">
@@ -389,5 +390,142 @@ export function ThemeSwitcher() {
         />
       ))}
     </div>
+  );
+}
+
+/* ————— pricing: 4 tiers, monthly/yearly, feature matrix ————— */
+/** cell: true = included · false = not · "store" = sold separately · string = its own wording */
+type Cell = boolean | "store" | string;
+const TIERS = [
+  { name: "باقة الانطلاق", icon: "⚡", price: PLAN_INFO.free.monthly, tag: "الاشتراك الحالي", note: "استمتع مجاناً دون إدخال بيانات البطاقة" },
+  { name: "الباقة الأساسية", icon: "★", price: PLAN_INFO.basic.monthly, note: "جرّب مجاناً 7 أيام دون إدخال بيانات البطاقة" },
+  { name: "باقة التميز", icon: "♛", price: PLAN_INFO.premium.monthly, tag: "الأكثر طلباً", featured: true, note: "جرّب مجاناً 7 أيام دون إدخال بيانات البطاقة" },
+  { name: "باقة شاملة", icon: "🚀", price: PLAN_INFO.ultimate.monthly, note: "جرّب مجاناً 7 أيام دون إدخال بيانات البطاقة" },
+];
+const FEATURES: { label: string; v: [Cell, Cell, Cell, Cell] }[] = [
+  { label: "عدد العناصر", v: ["امكانية اضافة 15 عنصر", "امكانية اضافة 100 عنصر", "عدد لا نهائي من العناصر", "عدد لا نهائي من العناصر"] },
+  { label: "عدد الأقسام", v: ["امكانية اضافة 5 أقسام", "امكانية اضافة 15 قسم", "عدد لا نهائي من الأقسام", "عدد لا نهائي من الأقسام"] },
+  { label: "التحكم بروابط التواصل الاجتماعي", v: [true, true, true, true] },
+  { label: "لا تتضمن إعلانات", v: [false, true, true, true] },
+  { label: "احصائيات متقدمة", v: [false, true, true, true] },
+  { label: "Seo تحسين ظهور محركات البحث", v: [false, true, true, true] },
+  { label: "تعدد طرق العرض", v: [false, true, true, true] },
+  { label: "تعدد اللغات", v: [false, true, true, true] },
+  { label: "نبذة عنا", v: [false, true, true, true] },
+  { label: "أوقات العمل", v: [false, true, true, true] },
+  { label: "التقييمات", v: [false, true, true, true] },
+  { label: "نظام الطلبات من خلال القائمة", v: [false, false, true, true] },
+  { label: "إدارة الطاولات", v: [false, false, true, true] },
+  { label: "تعدد صور الغلاف", v: [false, false, true, true] },
+  { label: "تعدد صور العناصر", v: [false, false, true, true] },
+  { label: "اشتراطات وزارة الصحة العراقية", v: [false, false, true, true] },
+  { label: "المشرفون", v: ["مشرف واحد", "مشرف واحد", "3 مشرفين", "10 مشرفين"] },
+  { label: "تطبيق الحجز", v: [false, "store", "store", true] },
+  { label: "تطبيق العروض الترويجية", v: [false, "store", "store", true] },
+  { label: "إمكانية إخفاء حقوق منيو بلس", v: [false, false, false, true] },
+];
+const SHORT = 8; // features shown before "عرض المزيد"
+
+export function Pricing() {
+  const [yearly, setYearly] = useState(false);
+  const [all, setAll] = useState(false);
+  const shown = all ? FEATURES : FEATURES.slice(0, SHORT);
+
+  return (
+    <>
+      <div className="mb-10 flex flex-wrap items-center justify-center gap-4">
+        <span className="inline-flex items-center gap-1.5 text-[13px] font-bold" style={{ color: "var(--brand-deep)" }}>
+          <span aria-hidden>↩</span> شهرين مجاناً
+        </span>
+        <div className="flex rounded-full p-1" style={{ background: "var(--surface)", border: "1px solid var(--line)" }}>
+          {[
+            ["سنوياً", true],
+            ["شهرياً", false],
+          ].map(([label, on]) => (
+            <button
+              key={label as string}
+              onClick={() => setYearly(on as boolean)}
+              className="rounded-full px-6 py-2 text-[14px] font-bold transition"
+              style={yearly === on ? { background: "var(--grad)", color: "#fff" } : { color: "var(--ink-soft)" }}
+            >
+              {label as string}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="grid items-stretch gap-5 md:grid-cols-2 xl:grid-cols-4">
+        {TIERS.map((t, i) => (
+          <div
+            key={t.name}
+            className="lift flex h-full flex-col overflow-hidden rounded-[22px]"
+            style={
+              t.featured
+                ? { background: "var(--surface-2)", border: "2px solid var(--brand)", boxShadow: "0 40px 80px -34px rgba(16,179,163,.45)" }
+                : { background: "var(--surface)", border: "1px solid var(--line)", boxShadow: "var(--shadow-md)" }
+            }
+          >
+            <div className="flex flex-col items-center gap-2 px-5 pb-6 pt-6 text-center">
+              <div className="flex w-full items-start justify-between">
+                {t.tag ? (
+                  <span
+                    className="rounded-full px-3 py-1 text-[11px] font-black"
+                    style={t.featured ? { background: "var(--grad)", color: "#fff" } : { background: "var(--brand-soft)", color: "var(--brand-deep)" }}
+                  >
+                    {t.tag}
+                  </span>
+                ) : (
+                  <span />
+                )}
+                <span className="text-2xl" aria-hidden>{t.icon}</span>
+              </div>
+              <h3 className="text-xl font-black" style={{ color: "var(--ink)" }}>{t.name}</h3>
+              <p className="flex items-end gap-1.5">
+                <span className="brand-text text-4xl font-black">{t.price === 0 ? "مجاناً" : iqd(yearly ? t.price * YEARLY_MONTHS : t.price)}</span>
+                {t.price > 0 && <span className="pb-1.5 text-[12px]" style={{ color: "var(--ink-soft)" }}>{yearly ? "سنوياً" : "شهرياً"}</span>}
+              </p>
+            </div>
+
+            <ul className="flex-1 space-y-3 border-t px-5 py-5" style={{ borderColor: "var(--line)" }}>
+              {shown.map((f) => {
+                const cell = f.v[i];
+                const on = cell === true || typeof cell === "string";
+                return (
+                  <li key={f.label} className="flex items-start gap-2.5 text-[13.5px] leading-6" style={{ color: on ? "var(--ink)" : "var(--ink-soft)" }}>
+                    <span
+                      aria-hidden
+                      className="mt-0.5 flex h-5 w-5 flex-none items-center justify-center rounded-full text-[11px] text-white"
+                      style={{ background: on ? "var(--grad)" : "color-mix(in srgb, var(--ink-soft) 45%, transparent)" }}
+                    >
+                      {on ? "✓" : "✕"}
+                    </span>
+                    <span>
+                      {typeof cell === "string" ? cell : f.label}
+                      {cell === "store" && <span className="text-[12px] opacity-70"> (متاح بالمتجر)</span>}
+                    </span>
+                  </li>
+                );
+              })}
+              <li>
+                <button onClick={() => setAll(!all)} className="mt-1 w-full rounded-full py-2 text-[13px] font-bold" style={{ color: "var(--brand-deep)", border: "1px solid var(--line)" }}>
+                  {all ? "عرض أقل ⌃" : "عرض المزيد ⌄"}
+                </button>
+              </li>
+            </ul>
+
+            <div className="px-5 pb-6">
+              <a
+                href="/sign-in"
+                className={`block rounded-full py-3.5 text-center text-[15px] font-bold ${t.featured ? "shimmer text-white" : ""}`}
+                style={t.featured ? { background: "var(--grad)", boxShadow: "var(--shadow-brand)" } : { color: "var(--brand-deep)", border: "1px solid var(--brand)" }}
+              >
+                {t.price === 0 ? "ابدأ مجاناً" : "ابدأ تجربتك المجانية"}
+              </a>
+              <p className="mt-3 text-center text-[12px] leading-5" style={{ color: "var(--ink-soft)" }}>{t.note}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+    </>
   );
 }

@@ -11,9 +11,16 @@ const tajawal = Tajawal({
 });
 
 export const metadata: Metadata = {
-  title: "منصّة المنيو الرقمي — منيو QR للمطاعم والمقاهي",
+  metadataBase: new URL("https://menuplus.rest"),
+  title: "منيو بلس (MenuPlus) — منيو QR وطلبات وحجوزات للمطاعم والمقاهي",
   description:
-    "حوّل قائمة مطعمك إلى منيو رقمي أنيق: QR على كل طاولة، بلونك وشعارك ونطاقك الخاص، مع تحديث فوري للأسعار واستقبال الطلبات — بدون تطبيق.",
+    "حوّل قائمة مطعمك إلى منيو رقمي أنيق: QR على كل طاولة، بلونك وشعارك ونطاقك الخاص، مع طلبات (صالة · دلفري · سفري)، حجز طاولات، ولوحة إدارة لكل مطعم — بدون تطبيق.",
+  openGraph: {
+    type: "website",
+    locale: "ar_IQ",
+    siteName: "منيو بلس",
+    url: "https://menuplus.rest",
+  },
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
