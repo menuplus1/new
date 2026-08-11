@@ -40,7 +40,7 @@ export function Stats({ client, restaurantId, currency, accent }: { client: Supa
     return (
       <div className={`${CARD} text-center`}>
         {err && <p className="mb-2 text-sm text-red-400">{err}</p>}
-        <p className="text-[#a6a6a3]">لا توجد بيانات بعد — تظهر الإحصائيات مع أول زيارات لمنيوك.</p>
+        <p className="text-[#a6a6a3]">لا توجد بيانات بعد — تظهر الإحصائيات مع أول زيارات للمنيو الخاص بك.</p>
         <p className="mt-2 text-xs text-[#a6a6a3]">شغّل ملف <span dir="ltr">0006_engagement.sql</span> إن لم تكن فعلت.</p>
       </div>
     );

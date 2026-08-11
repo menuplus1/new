@@ -9,7 +9,7 @@ type Promo = { id: string; title: string; description: string | null; image_url:
 
 const APPS: { key: AppKey; icon: string; name: string; desc: string }[] = [
   { key: "booking", icon: "📅", name: "تطبيق الحجز", desc: "استقبل حجوزات الطاولات من المنيو مباشرة — بالتاريخ والوقت وعدد الأشخاص." },
-  { key: "promos", icon: "🎁", name: "تطبيق العروض الترويجية", desc: "شريط عروض وحملات يظهر أعلى منيوك." },
+  { key: "promos", icon: "🎁", name: "تطبيق العروض الترويجية", desc: "شريط عروض وحملات يظهر أعلى المنيو الخاص بك." },
 ];
 
 export function Store({ client, rest, accent, onPatch }: { client: SupabaseClient; rest: Rest; accent: string; onPatch: (fields: Partial<Rest>) => Promise<void> }) {

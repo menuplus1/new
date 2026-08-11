@@ -337,7 +337,7 @@ export function Settings({ client, cur, patch, accent }: { client: SupabaseClien
             ))}
           </div>
         ) : (
-          <p className="mt-3 text-sm text-[#a6a6a3]">أضف الإنجليزية والكوردية لمنيوك — متاح مع الترقية.</p>
+          <p className="mt-3 text-sm text-[#a6a6a3]">أضف الإنجليزية والكوردية للمنيو الخاص بك — متاح مع الترقية.</p>
         )}
       </details>
 

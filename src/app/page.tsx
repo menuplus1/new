@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Nav, Reveal, Stat, TenantSwitcher, LiveMenuBoard, Faq, ThemeSwitcher, Pricing } from "@/components/landing/islands";
 import { MenuPreview, type PreviewData } from "@/components/landing/MenuPreview";
 
@@ -329,7 +330,7 @@ const ALL_FEATURES = [
   ["🎁", "العروض الترويجية", "شريط عروض أعلى المنيو"],
   ["👥", "عدة مشرفين", "حتى 10 حسابات لفريقك"],
   ["🔎", "SEO", "مطعمك يظهر في نتائج البحث"],
-  ["🎨", "6 قوالب", "بدّل شكل منيوك بضغطة"],
+  ["🎨", "6 قوالب", "بدّل شكل المنيو الخاص بك بضغطة"],
 ] as const;
 
 export default function Landing() {
@@ -369,10 +370,10 @@ export default function Landing() {
             </p>
 
             <div className="rise mt-9 flex flex-wrap items-center gap-4" style={{ animationDelay: "310ms" }}>
-              <a href="/sign-up" className="shimmer inline-flex items-center gap-2 rounded-full px-8 py-4 text-[15px] font-bold text-white" style={{ background: "var(--grad)", boxShadow: "var(--shadow-brand)" }}>
+              <Link href="/sign-up" className="shimmer inline-flex items-center gap-2 rounded-full px-8 py-4 text-[15px] font-bold text-white" style={{ background: "var(--grad)", boxShadow: "var(--shadow-brand)" }}>
                 <span>ابدأ مجاناً</span>
                 <span aria-hidden style={{ transform: "scaleX(-1)" }}>➜</span>
-              </a>
+              </Link>
               <a href="#menu" className="inline-flex items-center gap-2 rounded-full px-7 py-4 text-[15px] font-bold" style={{ color: "var(--brand-deep)", border: "1px solid var(--line)", background: "var(--surface)" }}>
                 شاهد عرضاً حيّاً
               </a>
@@ -569,10 +570,10 @@ export default function Landing() {
           <Reveal className="mx-auto mb-12 max-w-2xl text-center">
             <div className="flex justify-center"><Eyebrow>القوالب</Eyebrow></div>
             <h2 className="mt-4 text-[clamp(1.9rem,4vw,3.1rem)] font-black leading-tight" style={{ color: "var(--ink)" }}>
-              6 قوالب — <span className="brand-text">منيوك بالشكل الذي يليق بك</span>
+              6 قوالب — <span className="brand-text">المنيو الخاص بك بالشكل الذي يليق بك</span>
             </h2>
             <p className="mt-4 text-[15px]" style={{ color: "var(--ink-soft)" }}>
-              نفس منيوك وبياناتك، بستّة أشكال مختلفة — بدّل بينها من لوحة التحكم بضغطة واحدة.
+              نفس المنيو الخاص بك وبياناتك، بستّة أشكال مختلفة — بدّل بينها من لوحة التحكم بضغطة واحدة.
             </p>
           </Reveal>
 
@@ -774,9 +775,9 @@ export default function Landing() {
             <p className="mx-auto mt-4 max-w-lg text-[16px] leading-8" style={{ color: "var(--on-deep-soft)" }}>
               انضم إلى المطاعم التي تمنح زبائنها تجربةً أرقى — قائمة أنيقة، طلبٌ أسهل، وإدارةٌ أوضح.
             </p>
-            <a href="/sign-up" className="shimmer mt-9 inline-flex items-center gap-2 rounded-full px-9 py-4 text-[16px] font-bold text-white" style={{ background: "var(--grad)", boxShadow: "var(--shadow-brand)" }}>
+            <Link href="/sign-up" className="shimmer mt-9 inline-flex items-center gap-2 rounded-full px-9 py-4 text-[16px] font-bold text-white" style={{ background: "var(--grad)", boxShadow: "var(--shadow-brand)" }}>
               ابدأ مجاناً الآن <span aria-hidden style={{ transform: "scaleX(-1)" }}>➜</span>
-            </a>
+            </Link>
           </Reveal>
         </div>
       </section>
