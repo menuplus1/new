@@ -1,5 +1,6 @@
 import { createClient } from "@supabase/supabase-js";
 import { DEMO, DEMO_LIST } from "./demo";
+import { effectivePlan } from "./plans";
 import type { Category, MenuData, Restaurant, Variant } from "./types";
 
 const URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -87,7 +88,7 @@ async function fromDb(slug: string): Promise<MenuData | null> {
     ordering: r.ordering,
     order_types: r.order_types ?? ["dine_in", "delivery", "takeaway"],
     reservations: r.reservations ?? true,
-    plan: r.plan ?? "free",
+    plan: effectivePlan(r.plan ?? "free", r.trial_ends), // expired trial renders as free
     apps: r.apps ?? [],
     template: r.template ?? 1,
     tagline: r.tagline ?? null,

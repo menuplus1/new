@@ -2,7 +2,7 @@
 
 import { createClient } from "@supabase/supabase-js";
 import { orderProblem, reservationProblem, reviewProblem, type OrderType } from "./types";
-import { hasApp, type Plan } from "./plans";
+import { PLAN_INFO, TRIAL_DAYS, effectivePlan, hasApp, type Plan } from "./plans";
 import { notifyNewOrder, notifyNewReservation } from "./notify";
 
 /** unit_price/name are used for the demo receipt only — the DB rpc resolves
@@ -72,10 +72,10 @@ export async function reserveTable(input: {
   if (!sb) return { ok: true }; // demo mode
 
   try {
-    const { data: r } = await sb.from("restaurants").select("name, active, reservations, plan, apps, whatsapp_phone").eq("id", input.restaurantId).single();
+    const { data: r } = await sb.from("restaurants").select("name, active, reservations, plan, apps, trial_ends, whatsapp_phone").eq("id", input.restaurantId).single();
     if (!r || !r.active) return { ok: false, error: "المطعم غير متاح حالياً." };
     if (!r.reservations) return { ok: false, error: "الحجز متوقف حالياً." };
-    if (!hasApp({ plan: (r.plan ?? "free") as Plan, apps: r.apps ?? [] }, "booking"))
+    if (!hasApp({ plan: effectivePlan((r.plan ?? "free") as Plan, r.trial_ends), apps: r.apps ?? [] }, "booking"))
       return { ok: false, error: "الحجز غير متاح في باقة هذا المطعم." };
     const { error } = await sb.from("reservations").insert({
       restaurant_id: input.restaurantId,
@@ -127,6 +127,61 @@ export async function trackVisit(restaurantId: string, kind: "menu" | "cat" | "i
     await sb.rpc("track_visit", { p_restaurant: restaurantId, p_kind: kind, p_ref: ref ?? "" });
   } catch {
     /* stats are best-effort */
+  }
+}
+
+/* ————— free self-signup: restaurant + owner account in one step ————— */
+
+const SLUG_RE = /^[a-z0-9](?:[a-z0-9-]{1,28}[a-z0-9])$/;
+const RESERVED_SLUGS = new Set(["admin", "sign-in", "sign-up", "api", "sitemap.xml", "robots.txt", "www", "app"]);
+
+export async function signUpRestaurant(input: {
+  name: string;
+  slug: string;
+  color: string;
+  email: string;
+  password: string;
+  plan: Plan;
+}): Promise<{ ok: true } | { ok: false; error: string }> {
+  const name = input.name.trim();
+  const slug = input.slug.trim().toLowerCase();
+  const email = input.email.trim().toLowerCase();
+  if (name.length < 2 || name.length > 40) return { ok: false, error: "اسم المطعم بين حرفين و40 حرفاً." };
+  if (!SLUG_RE.test(slug) || RESERVED_SLUGS.has(slug))
+    return { ok: false, error: "الرابط: أحرف إنجليزية صغيرة وأرقام وشرطات فقط (3–30)." };
+  if (!/^\S+@\S+\.\S+$/.test(email)) return { ok: false, error: "بريد غير صالح." };
+  if (input.password.length < 8) return { ok: false, error: "كلمة المرور 8 أحرف على الأقل." };
+  if (!(input.plan in PLAN_INFO)) return { ok: false, error: "باقة غير معروفة." };
+  const color = /^#[0-9a-fA-F]{6}$/.test(input.color) ? input.color : "#10b3a3";
+
+  const sb = service();
+  if (!sb) return { ok: false, error: "المنصّة غير مربوطة بقاعدة بيانات بعد." };
+  try {
+    const { data: taken } = await sb.from("restaurants").select("id").eq("slug", slug).maybeSingle();
+    if (taken) return { ok: false, error: "هذا الرابط محجوز — جرّب اسماً آخر." };
+
+    const created = await sb.auth.admin.createUser({ email, password: input.password, email_confirm: true });
+    if (created.error || !created.data.user)
+      return { ok: false, error: created.error?.message.includes("already") ? "هذا البريد مسجّل مسبقاً — سجّل دخولك." : (created.error?.message ?? "تعذّر إنشاء الحساب.") };
+
+    // paid plans start as a 7-day trial (no payment integration yet); free is forever
+    const { error } = await sb.from("restaurants").insert({
+      slug,
+      name,
+      primary_color: color,
+      currency: "د.ع",
+      plan: input.plan,
+      trial_ends: input.plan === "free" ? null : new Date(Date.now() + TRIAL_DAYS * 86400000).toISOString(),
+      template: 1,
+      owner: created.data.user.id,
+    });
+    if (error) {
+      await sb.auth.admin.deleteUser(created.data.user.id); // don't strand an ownerless account
+      return { ok: false, error: error.message.includes("duplicate") ? "هذا الرابط محجوز — جرّب اسماً آخر." : error.message };
+    }
+    return { ok: true };
+  } catch (e) {
+    return { ok: false, error: (e as Error).message };
   }
 }
 

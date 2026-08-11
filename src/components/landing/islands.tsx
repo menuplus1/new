@@ -51,6 +51,7 @@ export function Reveal({
 
 /* ————— scroll-aware top bar ————— */
 const NAV_LINKS = [
+  ["القوالب", "#templates"],
   ["المميزات", "#features"],
   ["المطاعم", "#tenants"],
   ["الباقات", "#pricing"],
@@ -94,7 +95,7 @@ export function Nav() {
           <a href="/sign-in" className="hidden text-[14px] font-bold sm:inline" style={{ color: "var(--ink)" }}>
             تسجيل الدخول
           </a>
-          <a href="#pricing" className="shimmer rounded-full px-5 py-2.5 text-[14px] font-bold text-white" style={{ background: "var(--grad)", boxShadow: "var(--shadow-brand)" }}>
+          <a href="/sign-up" className="shimmer rounded-full px-5 py-2.5 text-[14px] font-bold text-white" style={{ background: "var(--grad)", boxShadow: "var(--shadow-brand)" }}>
             ابدأ الآن
           </a>
         </div>
@@ -397,10 +398,10 @@ export function ThemeSwitcher() {
 /** cell: true = included · false = not · "store" = sold separately · string = its own wording */
 type Cell = boolean | "store" | string;
 const TIERS = [
-  { name: "باقة الانطلاق", icon: "⚡", price: PLAN_INFO.free.monthly, tag: "الاشتراك الحالي", note: "استمتع مجاناً دون إدخال بيانات البطاقة" },
-  { name: "الباقة الأساسية", icon: "★", price: PLAN_INFO.basic.monthly, note: "جرّب مجاناً 7 أيام دون إدخال بيانات البطاقة" },
-  { name: "باقة التميز", icon: "♛", price: PLAN_INFO.premium.monthly, tag: "الأكثر طلباً", featured: true, note: "جرّب مجاناً 7 أيام دون إدخال بيانات البطاقة" },
-  { name: "باقة شاملة", icon: "🚀", price: PLAN_INFO.ultimate.monthly, note: "جرّب مجاناً 7 أيام دون إدخال بيانات البطاقة" },
+  { plan: "free", name: "باقة الانطلاق", icon: "⚡", price: PLAN_INFO.free.monthly, tag: "الاشتراك الحالي", note: "استمتع مجاناً دون إدخال بيانات البطاقة" },
+  { plan: "basic", name: "الباقة الأساسية", icon: "★", price: PLAN_INFO.basic.monthly, note: "جرّب مجاناً 7 أيام دون إدخال بيانات البطاقة" },
+  { plan: "premium", name: "باقة التميز", icon: "♛", price: PLAN_INFO.premium.monthly, tag: "الأكثر طلباً", featured: true, note: "جرّب مجاناً 7 أيام دون إدخال بيانات البطاقة" },
+  { plan: "ultimate", name: "باقة شاملة", icon: "🚀", price: PLAN_INFO.ultimate.monthly, note: "جرّب مجاناً 7 أيام دون إدخال بيانات البطاقة" },
 ];
 const FEATURES: { label: string; v: [Cell, Cell, Cell, Cell] }[] = [
   { label: "عدد العناصر", v: ["امكانية اضافة 15 عنصر", "امكانية اضافة 100 عنصر", "عدد لا نهائي من العناصر", "عدد لا نهائي من العناصر"] },
@@ -515,7 +516,7 @@ export function Pricing() {
 
             <div className="px-5 pb-6">
               <a
-                href="/sign-in"
+                href={`/sign-up?plan=${t.plan}`}
                 className={`block rounded-full py-3.5 text-center text-[15px] font-bold ${t.featured ? "shimmer text-white" : ""}`}
                 style={t.featured ? { background: "var(--grad)", boxShadow: "var(--shadow-brand)" } : { color: "var(--brand-deep)", border: "1px solid var(--brand)" }}
               >

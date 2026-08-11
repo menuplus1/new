@@ -85,9 +85,15 @@ export default function AdminPage() {
     (async () => {
       const { data: auth } = await client.auth.getUser();
       if (!auth.user) return router.replace("/sign-in");
-      // no owner filter: RLS scopes rows, so co-admins (restaurant_admins) see their restaurant too
-      const { data } = await client.from("restaurants").select("*").order("name");
-      const list = (data ?? []) as Rest[];
+      // restaurants rows are publicly readable (the menu needs them), so filter to
+      // what this account actually manages: owned + co-admin memberships
+      const [{ data: owned }, { data: memberships }] = await Promise.all([
+        client.from("restaurants").select("*").eq("owner", auth.user.id),
+        client.from("restaurant_admins").select("restaurant_id").eq("user_id", auth.user.id),
+      ]);
+      const ids = (memberships ?? []).map((m) => m.restaurant_id).filter((id) => !(owned ?? []).some((r) => r.id === id));
+      const { data: managed } = ids.length ? await client.from("restaurants").select("*").in("id", ids) : { data: [] };
+      const list = [...(owned ?? []), ...(managed ?? [])].sort((a, b) => a.name.localeCompare(b.name)) as Rest[];
       setRests(list);
       if (list[0]) {
         setCur(list[0]);

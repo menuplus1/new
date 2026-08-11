@@ -60,3 +60,10 @@ export const hasApp = (r: { plan: Plan; apps: string[] }, app: AppKey) =>
   r.plan === "ultimate" || (RANK[r.plan] >= 1 && r.apps.includes(app));
 
 export const iqd = (n: number) => `${n.toLocaleString("en-US")} د.ع`;
+
+/** paid signups start as a 7-day trial; expired trial behaves as free */
+export const TRIAL_DAYS = 7;
+export function effectivePlan(plan: Plan, trial_ends: string | null | undefined): Plan {
+  if (trial_ends && new Date(trial_ends).getTime() < Date.now()) return "free";
+  return plan;
+}
