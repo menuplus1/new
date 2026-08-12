@@ -214,7 +214,7 @@ export default function AdminPage() {
 
       {/* ————— sidebar (inline-start = right in RTL) ————— */}
       <aside
-        className={`fixed bottom-0 start-0 top-0 z-40 flex w-[264px] max-w-[84vw] flex-col overflow-y-auto border-e border-white/10 bg-[#161618] transition-[transform,visibility] duration-300 lg:static lg:w-[248px] lg:max-w-none lg:shrink-0 lg:translate-x-0 lg:visible ${navOpen ? "translate-x-0" : "invisible translate-x-full"}`}
+        className={`fixed bottom-0 start-0 top-0 z-40 flex w-[264px] max-w-[84vw] flex-col overflow-y-auto border-e border-white/10 bg-[#161618] transition-transform duration-300 lg:static lg:w-[248px] lg:max-w-none lg:shrink-0 lg:translate-x-0 ${navOpen ? "translate-x-0" : "pointer-events-none translate-x-full lg:pointer-events-auto"}`}
       >
         <Link href="/" className="flex shrink-0 items-center gap-2.5 px-4 pb-4 pt-5">
           <span className="flex size-9 items-center justify-center rounded-[11px] text-lg font-black text-white" style={{ background: "var(--grad)" }}>+</span>
