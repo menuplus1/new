@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { sb } from "@/lib/supabase-browser";
 import { ORDER_TYPE_LABEL, type OrderType } from "@/lib/types";
 import { PLAN_INFO } from "@/lib/plans";
+import { platformSession } from "@/lib/platform";
 import { MenuEditor } from "./MenuEditor";
 import { Tables } from "./Tables";
 import { Stats } from "./Stats";
@@ -122,6 +123,14 @@ export default function AdminPage() {
       const ids = (memberships ?? []).map((m) => m.restaurant_id).filter((id) => !(owned ?? []).some((r) => r.id === id));
       const { data: managed } = ids.length ? await client.from("restaurants").select("*").in("id", ids) : { data: [] };
       const list = [...(owned ?? []), ...(managed ?? [])].sort((a, b) => a.name.localeCompare(b.name)) as Rest[];
+      // حساب مدير المنصّة لا يملك مطعماً — مكانه /root لا هنا
+      if (!list.length) {
+        const token = (await client.auth.getSession()).data.session?.access_token;
+        if (token) {
+          const me = await platformSession(token);
+          if ("ok" in me && me.ok) return router.replace("/root");
+        }
+      }
       setRests(list);
       if (list[0]) {
         setCur(list[0]);
@@ -180,6 +189,10 @@ export default function AdminPage() {
     return (
       <Shell>
         <p className="text-center text-[#a6a6a3]">لا يوجد مطعم مرتبط بهذا الحساب.</p>
+        <p className="mt-2 text-center text-sm text-[#a6a6a3]">
+          إن كنت صاحب مطعم فسجّل دخولك بالحساب الصحيح، أو{" "}
+          <Link href="/sign-up" className="font-bold underline">أنشئ منيو مطعمك</Link>.
+        </p>
         <button onClick={() => client.auth.signOut().then(() => router.replace("/sign-in"))} className="mx-auto mt-4 block rounded-xl border border-white/15 px-4 py-2 text-sm font-bold">خروج</button>
       </Shell>
     );
