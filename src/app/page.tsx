@@ -246,77 +246,6 @@ const TPLS = [
   { n: 6, name: "الدافئ", desc: "ألوان كريمية دافئة — مقاهٍ ومخابز" },
 ];
 
-function TplMock({ n }: { n: number }) {
-  const bar = (bg: string, extra = "") => <span className={`block h-1.5 rounded-full ${extra}`} style={{ background: bg }} />;
-  const sq = (bg: string) => <span className="block aspect-square rounded-md" style={{ background: bg }} />;
-  const row = (thumb: string, line: string) => (
-    <span className="flex items-center gap-1.5 rounded-lg p-1" style={{ background: "rgba(255,255,255,.75)" }}>
-      <span className="block size-4 shrink-0 rounded-md" style={{ background: thumb }} />
-      <span className="block h-1.5 w-full rounded-full" style={{ background: line }} />
-    </span>
-  );
-  const chipRow = (on: string, off: string) => (
-    <span className="flex gap-1">
-      <span className="block h-2.5 w-8 rounded-full" style={{ background: on }} />
-      <span className="block h-2.5 w-6 rounded-full" style={{ background: off }} />
-      <span className="block h-2.5 w-7 rounded-full" style={{ background: off }} />
-    </span>
-  );
-  switch (n) {
-    case 1:
-      return (
-        <div className="flex h-full gap-1.5 rounded-xl p-2" style={{ background: "#17171a" }}>
-          <div className="grid flex-1 grid-cols-2 content-start gap-1.5">{sq("#26262b")}{sq("#26262b")}{sq("#26262b")}{sq("#2f9e7a55")}</div>
-          <div className="flex w-4 flex-col gap-1.5">{bar("#f2f2f0")}{bar("#3a3a40")}{bar("#3a3a40")}{bar("#3a3a40")}</div>
-        </div>
-      );
-    case 2:
-      return (
-        <div className="flex h-full flex-col gap-1.5 rounded-xl p-2" style={{ background: "#f1f1f1" }}>
-          <span className="block h-7 rounded-lg" style={{ background: "linear-gradient(120deg,#2f9e7a,#14523d)" }} />
-          <span className="block h-6 rounded-lg" style={{ background: "linear-gradient(135deg,#b3542e,#66290f)" }} />
-          <span className="block h-6 rounded-lg" style={{ background: "linear-gradient(135deg,#7aa953,#3f6428)" }} />
-          <span className="block h-6 rounded-lg" style={{ background: "linear-gradient(135deg,#3b8ea5,#1c4d5c)" }} />
-        </div>
-      );
-    case 3:
-      return (
-        <div className="flex h-full flex-col items-center gap-1.5 rounded-xl p-2" style={{ background: "#faf8f3" }}>
-          <span className="block h-6 w-full rounded-lg" style={{ background: "linear-gradient(120deg,#c9b299,#8a7355)" }} />
-          <span className="-mt-3 block size-5 rounded-full border-2 border-[#faf8f3]" style={{ background: "#b08d3e" }} />
-          <span className="block h-1 w-8 rounded-full" style={{ background: "#b08d3e" }} />
-          <span className="block h-6 w-full rounded-lg" style={{ background: "linear-gradient(135deg,#8c7a3f,#4d421d)" }} />
-          <span className="block h-6 w-full rounded-lg" style={{ background: "linear-gradient(135deg,#b3542e,#66290f)" }} />
-        </div>
-      );
-    case 4:
-      return (
-        <div className="flex h-full flex-col gap-1.5 rounded-xl p-2" style={{ background: "#1a1a1a" }}>
-          {chipRow("#10b3a3", "#333")}
-          <div className="grid flex-1 grid-cols-2 content-start gap-1.5">{sq("#242427")}{sq("#242427")}{sq("#242427")}{sq("#10b3a355")}</div>
-        </div>
-      );
-    case 5:
-      return (
-        <div className="flex h-full flex-col gap-1.5 rounded-xl p-2" style={{ background: "#f1f1f1" }}>
-          {chipRow("#10b3a3", "#fff")}
-          {row("linear-gradient(135deg,#6b4226,#3c2415)", "#d5d5d5")}
-          {row("linear-gradient(135deg,#3b6ea5,#1d3a57)", "#d5d5d5")}
-          {row("linear-gradient(135deg,#a05a7c,#5c2e47)", "#d5d5d5")}
-        </div>
-      );
-    default:
-      return (
-        <div className="flex h-full flex-col gap-1.5 rounded-xl p-2" style={{ background: "#faf5ea" }}>
-          {chipRow("#1f1f1f", "#00000018")}
-          {row("linear-gradient(135deg,#c98a2b,#7a4d0e)", "#e2d5b8")}
-          {row("linear-gradient(135deg,#b3542e,#66290f)", "#e2d5b8")}
-          {row("linear-gradient(135deg,#8c7a3f,#4d421d)", "#e2d5b8")}
-        </div>
-      );
-  }
-}
-
 /* ————— the interconnected feature set, at a glance ————— */
 const ALL_FEATURES = [
   ["📱", "منيو QR بالصور", "بدون تطبيق — يفتح برقم الطاولة"],
@@ -581,13 +510,20 @@ export default function Landing() {
             {TPLS.map((tp, i) => (
               <Reveal key={tp.n} delay={i * 70}>
                 <div className="lift flex h-full flex-col rounded-3xl surface p-5" style={{ border: tp.free ? "2px solid var(--brand)" : "1px solid var(--line)", boxShadow: "var(--shadow-md)" }}>
-                  <div className="relative h-44">
-                    <TplMock n={tp.n} />
-                    {tp.free && (
-                      <span className="absolute -top-2 start-3 rounded-full px-3 py-1 text-[11px] font-black text-white" style={{ background: "var(--grad)" }}>
-                        مجاني دائماً
-                      </span>
-                    )}
+                  {/* the real template, live — same page a customer sees, scaled to fit */}
+                  <div className="relative h-80 overflow-hidden rounded-[20px]" style={{ border: "1px solid var(--line)", background: "#101012" }}>
+                    <iframe
+                      src={`/sham?tpl=${tp.n}`}
+                      title={tp.name}
+                      loading="lazy"
+                      tabIndex={-1}
+                      className="pointer-events-none absolute left-0 top-0 origin-top-left"
+                      style={{ width: "200%", height: "200%", transform: "scale(0.5)", border: 0 }}
+                    />
+                    <a href={`/sham?tpl=${tp.n}`} target="_blank" className="absolute inset-0" aria-label={`معاينة ${tp.name}`} />
+                    <span className="absolute top-2 start-2 rounded-full px-3 py-1 text-[11px] font-black text-white" style={{ background: tp.free ? "var(--grad)" : "rgba(0,0,0,.55)" }}>
+                      {tp.free ? "مجاني دائماً" : "الباقات المدفوعة"}
+                    </span>
                   </div>
                   <h3 className="mt-4 text-lg font-black" style={{ color: "var(--ink)" }}>
                     {tp.n}. {tp.name}

@@ -10,6 +10,16 @@ import { PLAN_INFO, TRIAL_DAYS, iqd, type Plan } from "@/lib/plans";
 const PLANS: Plan[] = ["free", "basic", "premium", "ultimate"];
 const INPUT = { background: "var(--surface-2)", border: "1px solid var(--line)", color: "var(--ink)" } as const;
 
+/** template chips: number + name + a 3-color mood strip (the real previews live on the landing) */
+const TPL_CHIPS: { n: number; name: string; colors: [string, string, string] }[] = [
+  { n: 1, name: "اللوحي الداكن", colors: ["#17171a", "#26262b", "#2f9e7a"] },
+  { n: 2, name: "بطاقات الأقسام", colors: ["#f1f1f1", "#b3542e", "#7aa953"] },
+  { n: 3, name: "الفاخر", colors: ["#faf8f3", "#b08d3e", "#8c7a3f"] },
+  { n: 4, name: "الداكن السريع", colors: ["#1a1a1a", "#10b3a3", "#242427"] },
+  { n: 5, name: "المدمج", colors: ["#f1f1f1", "#6b4226", "#3b6ea5"] },
+  { n: 6, name: "الدافئ", colors: ["#faf5ea", "#c98a2b", "#1f1f1f"] },
+];
+
 /** auth pages follow the landing's live theme (same localStorage key as ThemeSwitcher) */
 function applySavedTheme() {
   const t = localStorage.getItem("emenu-theme") || "turquoise";
@@ -20,6 +30,7 @@ function applySavedTheme() {
 export default function SignUpPage() {
   const router = useRouter();
   const [plan, setPlan] = useState<Plan>("free");
+  const [template, setTemplate] = useState(1);
   const [f, setF] = useState({ name: "", slug: "", color: "#10b3a3", email: "", password: "" });
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
@@ -39,7 +50,7 @@ export default function SignUpPage() {
     if (!client) return setErr("المنصّة غير مربوطة بقاعدة بيانات بعد.");
     setBusy(true);
     setErr(null);
-    const res = await signUpRestaurant({ ...f, plan });
+    const res = await signUpRestaurant({ ...f, plan, template });
     if (!res.ok) {
       setBusy(false);
       return setErr(res.error);
@@ -80,6 +91,37 @@ export default function SignUpPage() {
             تغيير
           </Link>
         </div>
+
+        {/* ابدأ من قالب جاهز — المعاينات الحيّة في قسم القوالب بالصفحة الرئيسية */}
+        <p className="mt-4 text-[13px] font-extrabold">ابدأ من قالب جاهز</p>
+        <div className="mt-2 grid grid-cols-3 gap-2">
+          {TPL_CHIPS.map((tp) => {
+            const locked = plan === "free" && tp.n !== 1;
+            const on = template === tp.n;
+            return (
+              <button
+                key={tp.n}
+                type="button"
+                disabled={locked}
+                onClick={() => setTemplate(tp.n)}
+                className={`rounded-xl border p-2 text-start ${on ? "border-[#22c1a4]" : "border-transparent"} disabled:opacity-35`}
+                style={{ background: "var(--surface-2)", borderColor: on ? undefined : "var(--line)" }}
+              >
+                <span className="flex h-6 overflow-hidden rounded-md">
+                  {tp.colors.map((c) => <span key={c} className="flex-1" style={{ background: c }} />)}
+                </span>
+                <span className="mt-1.5 block truncate text-[11px] font-bold">{tp.n}. {tp.name}</span>
+                <span className="block text-[10px]" style={{ color: "var(--ink-soft)" }}>
+                  {tp.n === 1 ? "مجاني دائماً" : locked ? "للباقات المدفوعة" : "متاح لك"}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+        <p className="mt-1.5 text-[11px]" style={{ color: "var(--ink-soft)" }}>
+          منيو جاهز بأصناف وأسعار قابلة للتعديل — تبدأ فوراً وتعدّل كل شيء من لوحة التحكم.{" "}
+          <Link href="/#templates" className="font-bold underline" style={{ color: "var(--brand-deep)" }}>شاهد القوالب حيّة</Link>
+        </p>
 
         <input value={f.name} onChange={(e) => setF({ ...f, name: e.target.value })} placeholder="اسم المطعم (مثال: قهوة النخلة)" className="mt-4 w-full rounded-xl px-3 py-3 text-sm outline-none" style={INPUT} />
         <div className="mt-2 flex items-center gap-2 rounded-xl px-3" dir="ltr" style={INPUT}>

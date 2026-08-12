@@ -3,6 +3,7 @@
 import { createClient } from "@supabase/supabase-js";
 import { orderProblem, reservationProblem, reviewProblem, type OrderType } from "./types";
 import { PLAN_INFO, TRIAL_DAYS, effectivePlan, hasApp, type Plan } from "./plans";
+import { STARTERS } from "./starter-menus";
 import { notifyNewOrder, notifyNewReservation } from "./notify";
 
 /** unit_price/name are used for the demo receipt only — the DB rpc resolves
@@ -142,6 +143,7 @@ export async function signUpRestaurant(input: {
   email: string;
   password: string;
   plan: Plan;
+  template: number;
 }): Promise<{ ok: true } | { ok: false; error: string }> {
   const name = input.name.trim();
   const slug = input.slug.trim().toLowerCase();
@@ -164,20 +166,55 @@ export async function signUpRestaurant(input: {
     if (created.error || !created.data.user)
       return { ok: false, error: created.error?.message.includes("already") ? "هذا البريد مسجّل مسبقاً — سجّل دخولك." : (created.error?.message ?? "تعذّر إنشاء الحساب.") };
 
+    // free plan is locked to the always-free template (mirrors the DB clamp in 0005)
+    const template = input.plan === "free" ? 1 : Math.min(6, Math.max(1, Math.round(input.template) || 1));
+    const starter = STARTERS[template];
+
     // paid plans start as a 7-day trial (no payment integration yet); free is forever
-    const { error } = await sb.from("restaurants").insert({
-      slug,
-      name,
-      primary_color: color,
-      currency: "د.ع",
-      plan: input.plan,
-      trial_ends: input.plan === "free" ? null : new Date(Date.now() + TRIAL_DAYS * 86400000).toISOString(),
-      template: 1,
-      owner: created.data.user.id,
-    });
-    if (error) {
+    const { data: rest, error } = await sb
+      .from("restaurants")
+      .insert({
+        slug,
+        name,
+        primary_color: color,
+        currency: "د.ع",
+        plan: input.plan,
+        trial_ends: input.plan === "free" ? null : new Date(Date.now() + TRIAL_DAYS * 86400000).toISOString(),
+        template,
+        covers: [starter.cover],
+        hours: Array.from({ length: 7 }, () => ({ closed: false, open: "09:00", close: "23:00" })),
+        owner: created.data.user.id,
+      })
+      .select("id")
+      .single();
+    if (error || !rest) {
       await sb.auth.admin.deleteUser(created.data.user.id); // don't strand an ownerless account
-      return { ok: false, error: error.message.includes("duplicate") ? "هذا الرابط محجوز — جرّب اسماً آخر." : error.message };
+      return { ok: false, error: error?.message.includes("duplicate") ? "هذا الرابط محجوز — جرّب اسماً آخر." : (error?.message ?? "تعذّر الإنشاء.") };
+    }
+
+    // seed the ready-made starter menu — best-effort: an empty menu must not fail signup
+    try {
+      const { data: cats } = await sb
+        .from("categories")
+        .insert(starter.cats.map((c, i) => ({ restaurant_id: rest.id, name: c.name, image_url: c.tile, sort: i })))
+        .select("id, name");
+      if (cats?.length) {
+        const byName = new Map(cats.map((c) => [c.name, c.id]));
+        await sb.from("menu_items").insert(
+          starter.cats.flatMap((c) =>
+            c.items.map(([n, p, d], i) => ({
+              restaurant_id: rest.id,
+              category_id: byName.get(c.name),
+              name: n,
+              price: p,
+              description: d ?? null,
+              sort: i,
+            })),
+          ),
+        );
+      }
+    } catch {
+      /* starter seeding is a convenience, not a requirement */
     }
     return { ok: true };
   } catch (e) {
