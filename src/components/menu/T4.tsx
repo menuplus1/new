@@ -89,7 +89,7 @@ export function T4() {
                 <div className="relative aspect-square">
                   {it.image_url ? (
                     // eslint-disable-next-line @next/next/no-img-element
-                    <img src={it.image_url} alt={m.name(it)} loading="lazy" className="h-full w-full object-cover" />
+                    <img src={it.image_url} alt={m.name(it)} loading={m.eager ? "eager" : "lazy"} className="h-full w-full object-cover" />
                   ) : (
                     <div className="flex h-full w-full items-center justify-center text-5xl font-black text-[#141414]" style={{ background: `linear-gradient(135deg, ${accent}, ${accent}66)` }}>
                       {m.name(it).charAt(0)}

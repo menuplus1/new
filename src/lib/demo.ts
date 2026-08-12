@@ -1,22 +1,25 @@
+import { IMG } from "./food-images";
 import type { Category, DayHours, MenuData } from "./types";
 
-/** Demo tenants — the platform renders these when no database is connected yet.
+/** Demo tenants — the platform renders these when no database is connected yet,
+ *  and they are what the landing's live template previews show. Real photos and
+ *  real prices, because that showcase is the product pitch.
  *  dallah = الباقة الأساسية (منيو للعرض فقط، لغتان، قالب مدمج) —
  *  sham   = الباقة الشاملة (كل الميزات: طلبات، حجز، عروض، تقييمات، ٣ لغات). */
 
-type Row = [string, number, string?, string?]; // name, price, desc?, en name?
+type Row = [name: string, price: number, image: string, en?: string, desc?: string];
 
 function cat(name: string, en: string, tile: string, items: Row[]): Category {
   return {
     id: name,
     name,
-    image_url: tile, // CSS gradient — CoverHero/category cards render gradients in demo mode
+    image_url: tile,
     i18n: { en: { name: en } },
-    items: items.map(([n, p, d, e], i) => ({
+    items: items.map(([n, p, img, e, d], i) => ({
       id: `${name}-${i}`,
       name: n,
       description: d ?? null,
-      image_url: null,
+      image_url: img,
       price: p,
       variants: [],
       i18n: e ? { en: { name: e } } : {},
@@ -49,29 +52,28 @@ export const DEMO: Record<string, MenuData> = {
       languages: ["ar", "en"],
       i18n: { en: { name: "Dallah Coffee", tagline: "Specialty coffee & homemade sweets" } },
       seo: {},
-      covers: ["linear-gradient(120deg,#d18b4a,#8a5526)"],
+      covers: [IMG.coverCafe],
       hide_branding: false,
       health_cert: null,
     },
     categories: [
-      cat("المشروبات الساخنة", "Hot Drinks", "linear-gradient(135deg,#6b4226,#3c2415)", [
-        ["إسبريسو", 2500, undefined, "Espresso"],
-        ["لاتيه", 3000, undefined, "Latte"],
-        ["كابتشينو", 3000, undefined, "Cappuccino"],
-        ["موكا", 3500, undefined, "Mocha"],
-        ["قهوة تركية", 2500, undefined, "Turkish Coffee"],
-        ["شاي كرك", 1500, undefined, "Karak Tea"],
+      cat("المشروبات الساخنة", "Hot Drinks", IMG.latte, [
+        ["إسبريسو", 2500, IMG.coffeeCookies, "Espresso"],
+        ["لاتيه", 3500, IMG.latte, "Latte"],
+        ["كابتشينو", 3500, IMG.cappuccino, "Cappuccino"],
+        ["چاي كرك", 1500, IMG.tea, "Karak Tea"],
       ]),
-      cat("المشروبات الباردة", "Cold Drinks", "linear-gradient(135deg,#3b6ea5,#1d3a57)", [
-        ["آيس لاتيه", 3500, undefined, "Iced Latte"],
-        ["آيس أمريكانو", 3000, undefined, "Iced Americano"],
-        ["فرابتشينو", 4000, undefined, "Frappuccino"],
-        ["موهيتو", 4000, undefined, "Mojito"],
+      cat("المشروبات الباردة", "Cold Drinks", IMG.icedLatte, [
+        ["آيس لاتيه", 4000, IMG.icedLatte, "Iced Latte"],
+        ["كولد برو", 4500, IMG.coldBrew, "Cold Brew"],
+        ["سموذي فراولة", 5000, IMG.smoothie, "Strawberry Smoothie"],
+        ["ليمون نعناع", 3000, IMG.lemonMint, "Mint Lemonade"],
       ]),
-      cat("الحلويات", "Desserts", "linear-gradient(135deg,#a05a7c,#5c2e47)", [
-        ["تشيز كيك", 4000, "بسكويت مطحون وجبنة كريمية", "Cheesecake"],
-        ["كوكيز", 2500, undefined, "Cookies"],
-        ["كرواسون", 2000, undefined, "Croissant"],
+      cat("الحلويات", "Desserts", IMG.chocolateDessert, [
+        ["كوكيز", 2500, IMG.cookies, "Cookies"],
+        ["حلى الشوكولاتة", 6000, IMG.chocolateDessert, "Chocolate Dessert"],
+        ["كرواسون", 3000, IMG.croissant, "Croissant"],
+        ["كيكة الشوكولاتة", 5000, IMG.chocolateCake, "Chocolate Cake"],
       ]),
     ],
     promos: [],
@@ -92,8 +94,8 @@ export const DEMO: Record<string, MenuData> = {
       plan: "ultimate",
       apps: [],
       template: 1,
-      tagline: "مأكولات شامية أصيلة منذ ١٩٨٨",
-      about: "مطبخ شامي عريق — مشاوي على الفحم، مقبلات طازجة يومياً، وجلسات عائلية.",
+      tagline: "مأكولات شامية وعراقية أصيلة منذ ١٩٨٨",
+      about: "مطبخ عريق — مشاوي على الفحم، مقبلات طازجة يومياً، وجلسات عائلية.",
       socials: {
         instagram: "https://instagram.com/sham",
         facebook: "https://facebook.com/sham",
@@ -105,33 +107,35 @@ export const DEMO: Record<string, MenuData> = {
         en: { name: "Bait Al-Sham", tagline: "Authentic Levantine cuisine since 1988" },
         ckb: { name: "ماڵی شام", tagline: "خواردنی شامی ڕەسەن لە ١٩٨٨ەوە" },
       },
-      seo: { title: "بيت الشام — مشاوي ومأكولات شامية في بغداد", description: "منيو مطعم بيت الشام: مشاوي على الفحم، مقبلات، وأطباق شامية أصيلة." },
-      covers: ["linear-gradient(120deg,#2f9e7a,#14523d)", "linear-gradient(120deg,#c98a2b,#7a4d0e)"],
+      seo: {
+        title: "بيت الشام — مشاوي ومأكولات شامية في بغداد",
+        description: "منيو مطعم بيت الشام: مشاوي على الفحم، مقبلات، وأطباق شامية أصيلة.",
+      },
+      covers: [IMG.coverGrill, IMG.coverRestaurant],
       hide_branding: false,
       health_cert: "إجازة صحية رقم 4821 — بغداد",
     },
     categories: [
-      cat("المقبلات", "Starters", "linear-gradient(135deg,#7aa953,#3f6428)", [
-        ["حمص", 3000, "حمص مطحون بالطحينة وزيت الزيتون", "Hummus"],
-        ["متبل", 3000, undefined, "Mutabbal"],
-        ["تبولة", 3500, undefined, "Tabbouleh"],
-        ["فتوش", 3500, undefined, "Fattoush"],
+      cat("المقبلات", "Starters", IMG.mezze, [
+        ["مقبلات مشكّلة", 5000, IMG.mezze, "Mezze", "حمص · متبل · مخللات"],
+        ["سمبوسة", 2000, IMG.samosa, "Samosa", "٤ حبات"],
+        ["سلطة عراقية", 2500, IMG.salad, "Iraqi Salad"],
       ]),
-      cat("المشاوي", "Grills", "linear-gradient(135deg,#b3542e,#66290f)", [
-        ["شيش طاووق", 9000, "صدر دجاج متبّل على الفحم", "Shish Tawook"],
-        ["كباب لحم", 10000, undefined, "Lamb Kebab"],
-        ["ريش غنم", 14000, undefined, "Lamb Chops"],
-        ["مشاوي مشكّلة", 18000, "تشكيلة تكفي شخصين", "Mixed Grill"],
+      cat("المشاوي", "Grills", IMG.kebab, [
+        ["كباب عراقي", 12000, IMG.kebab, "Iraqi Kebab", "لحم غنم على الفحم"],
+        ["تكة لحم", 13000, IMG.tikka, "Lamb Tikka"],
+        ["شيش طاووق", 10000, IMG.grilledPlate, "Shish Tawook"],
+        ["مشاوي مشكّلة", 22000, IMG.mixedGrill, "Mixed Grill", "تكفي شخصين"],
       ]),
-      cat("الأطباق الرئيسية", "Mains", "linear-gradient(135deg,#8c7a3f,#4d421d)", [
-        ["مندي دجاج", 8000, undefined, "Chicken Mandi"],
-        ["برياني لحم", 11000, undefined, "Lamb Biryani"],
-        ["مقلوبة", 9000, undefined, "Maqluba"],
+      cat("الأطباق الرئيسية", "Mains", IMG.tashreeb, [
+        ["تشريب", 9000, IMG.tashreeb, "Tashreeb"],
+        ["ربيان بالرز", 15000, IMG.shrimpRice, "Shrimp Rice", "طبق بصراوي"],
+        ["دجاج مشوي", 11000, IMG.grilledChicken, "Grilled Chicken", "نصف دجاجة"],
       ]),
-      cat("المشروبات", "Drinks", "linear-gradient(135deg,#3b8ea5,#1c4d5c)", [
-        ["عصير برتقال", 3000, undefined, "Orange Juice"],
-        ["ليمون نعناع", 3000, undefined, "Mint Lemonade"],
-        ["مياه", 500, undefined, "Water"],
+      cat("المشروبات", "Drinks", IMG.tea, [
+        ["چاي عراقي", 1000, IMG.tea, "Iraqi Tea"],
+        ["عصير برتقال", 3000, IMG.orangeJuice, "Orange Juice"],
+        ["ليمون نعناع", 3000, IMG.lemonMint, "Mint Lemonade"],
       ]),
     ],
     promos: [

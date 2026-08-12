@@ -74,7 +74,7 @@ export function T1() {
                 <div className="relative aspect-[4/5] cursor-pointer bg-[var(--panel)]" onClick={() => m.openItem(it)}>
                   {it.image_url ? (
                     // eslint-disable-next-line @next/next/no-img-element
-                    <img src={it.image_url} alt={m.name(it)} loading="lazy" className="h-full w-full object-cover" />
+                    <img src={it.image_url} alt={m.name(it)} loading={m.eager ? "eager" : "lazy"} className="h-full w-full object-cover" />
                   ) : (
                     <span className="absolute inset-0 m-auto flex size-14 items-center justify-center rounded-full text-2xl font-black text-[var(--activeink)] opacity-80" style={{ background: accent }}>
                       {m.name(it).charAt(0)}

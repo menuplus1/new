@@ -95,7 +95,7 @@ export function T6() {
                     <div className="size-20 shrink-0 rounded-2xl" style={{ background: it.image_url }} />
                   ) : (
                     // eslint-disable-next-line @next/next/no-img-element
-                    <img src={it.image_url} alt={m.name(it)} loading="lazy" className="size-20 shrink-0 rounded-2xl object-cover" />
+                    <img src={it.image_url} alt={m.name(it)} loading={m.eager ? "eager" : "lazy"} className="size-20 shrink-0 rounded-2xl object-cover" />
                   )
                 ) : (
                   <span className="flex size-20 shrink-0 items-center justify-center rounded-2xl text-2xl font-black text-white" style={{ background: accent }}>

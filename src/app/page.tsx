@@ -513,7 +513,7 @@ export default function Landing() {
                   {/* the real template, live — same page a customer sees, scaled to fit */}
                   <div className="relative h-80 overflow-hidden rounded-[20px]" style={{ border: "1px solid var(--line)", background: "#101012" }}>
                     <iframe
-                      src={`/sham?tpl=${tp.n}`}
+                      src={`/sham?tpl=${tp.n}&preview=1`}
                       title={tp.name}
                       loading="lazy"
                       tabIndex={-1}

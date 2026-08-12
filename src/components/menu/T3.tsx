@@ -74,7 +74,7 @@ export function T3() {
                   <div className="absolute inset-0" style={{ background: bg }} />
                 ) : (
                   // eslint-disable-next-line @next/next/no-img-element
-                  <img src={bg} alt="" loading="lazy" className="absolute inset-0 h-full w-full object-cover" />
+                  <img src={bg} alt="" loading={m.eager ? "eager" : "lazy"} className="absolute inset-0 h-full w-full object-cover" />
                 )}
                 <div className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(10,8,4,.75), transparent 65%)" }} />
                 <span className="absolute bottom-5 w-full text-center text-2xl font-black">
@@ -100,7 +100,7 @@ export function T3() {
               <div key={it.id} onClick={() => m.openItem(it)} className="flex cursor-pointer items-center gap-3 border-b border-[#e7e2d6] py-4">
                 {it.image_url && (
                   // eslint-disable-next-line @next/next/no-img-element
-                  <img src={it.image_url} alt="" loading="lazy" className="size-16 shrink-0 rounded-xl object-cover" />
+                  <img src={it.image_url} alt="" loading={m.eager ? "eager" : "lazy"} className="size-16 shrink-0 rounded-xl object-cover" />
                 )}
                 <div className="min-w-0 flex-1">
                   <div className="flex items-baseline gap-2">

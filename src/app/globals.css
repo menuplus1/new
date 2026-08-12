@@ -1,5 +1,12 @@
 @import "tailwindcss";
 
+/* marquee utilities (Tailwind v4 --animate-* → .animate-marquee / .animate-marquee-vertical).
+   Keyframes are named marquee-x/-y so they don't clobber the legacy .marquee below. */
+@theme inline {
+  --animate-marquee: marquee-x var(--duration) infinite linear;
+  --animate-marquee-vertical: marquee-y var(--duration) linear infinite;
+}
+
 /* ============================================================
    THEME TOKENS — three complete palettes for comparison.
    Default :root = turquoise. [data-theme="indigo"|"wine"] override.
@@ -182,10 +189,24 @@ body {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .rise, .floaty, .floaty-slow, .glow-pulse, .drift, .drift-2, .spin-slow, .toast-cycle, .marquee {
+  .rise, .floaty, .floaty-slow, .glow-pulse, .drift, .drift-2, .spin-slow, .toast-cycle, .marquee,
+  .animate-marquee, .animate-marquee-vertical {
     animation: none !important;
     opacity: 1 !important;
     transform: none !important;
   }
   [data-reveal].pre { opacity: 1 !important; transform: none !important; }
 }
+
+/* ————— testimonials marquee ————— */
+@keyframes marquee-x {
+  from { transform: translateX(0); }
+  to { transform: translateX(calc(-100% - var(--gap))); }
+}
+@keyframes marquee-y {
+  from { transform: translateY(0); }
+  to { transform: translateY(calc(-100% - var(--gap))); }
+}
+/* explicit fallbacks in case the @theme inline utilities aren't picked up */
+.animate-marquee { animation: marquee-x var(--duration) infinite linear; }
+.animate-marquee-vertical { animation: marquee-y var(--duration) linear infinite; }

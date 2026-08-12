@@ -202,11 +202,12 @@ export async function signUpRestaurant(input: {
         const byName = new Map(cats.map((c) => [c.name, c.id]));
         await sb.from("menu_items").insert(
           starter.cats.flatMap((c) =>
-            c.items.map(([n, p, d], i) => ({
+            c.items.map(([n, p, img, d], i) => ({
               restaurant_id: rest.id,
               category_id: byName.get(c.name),
               name: n,
               price: p,
+              image_url: img,
               description: d ?? null,
               sort: i,
             })),

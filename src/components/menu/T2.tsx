@@ -71,7 +71,7 @@ export function T2() {
               >
                 {c.image_url && !isGradient(c.image_url) ? (
                   // eslint-disable-next-line @next/next/no-img-element
-                  <img src={c.image_url} alt="" loading="lazy" className="absolute inset-0 h-full w-full object-cover" />
+                  <img src={c.image_url} alt="" loading={m.eager ? "eager" : "lazy"} className="absolute inset-0 h-full w-full object-cover" />
                 ) : (
                   <div className="absolute inset-0" style={{ background: catBg(c) }} />
                 )}
@@ -102,7 +102,7 @@ export function T2() {
                     <div className="size-20 shrink-0 rounded-xl" style={{ background: it.image_url }} />
                   ) : (
                     // eslint-disable-next-line @next/next/no-img-element
-                    <img src={it.image_url} alt={m.name(it)} loading="lazy" className="size-20 shrink-0 rounded-xl object-cover" />
+                    <img src={it.image_url} alt={m.name(it)} loading={m.eager ? "eager" : "lazy"} className="size-20 shrink-0 rounded-xl object-cover" />
                   )
                 ) : (
                   <span className="flex size-20 shrink-0 items-center justify-center rounded-xl text-xl font-black" style={{ background: `color-mix(in srgb, ${accent} 15%, white)`, color: accent }}>

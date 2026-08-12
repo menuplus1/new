@@ -95,6 +95,8 @@ type Ctx = {
   showBranding: boolean;
   showAd: boolean;
   openNow: boolean | null;
+  /** true inside the landing/admin preview frames — images must not lazy-load there */
+  eager: boolean;
   /* cart */
   lines: Line[];
   count: number;
@@ -154,6 +156,14 @@ export function MenuProvider({ data, table, children }: { data: MenuData; table:
     [r.plan, r.languages],
   );
   const [lang, setLang] = useState<Lang>("ar");
+  // preview frames (landing showcase, admin picker) are small and offscreen —
+  // lazy images would never fetch there, so render them eagerly
+  const [eager, setEager] = useState(false);
+  useEffect(() => {
+    (async () => {
+      if (new URLSearchParams(window.location.search).has("preview")) setEager(true);
+    })();
+  }, []);
   const t = (k: UIKey) => UI[lang][k] ?? UI.ar[k];
 
   const ordering = r.ordering && can(r.plan, "ordering");
@@ -201,6 +211,7 @@ export function MenuProvider({ data, table, children }: { data: MenuData; table:
     showBranding: !(r.hide_branding && can(r.plan, "hide_branding")),
     showAd: !can(r.plan, "no_ads"),
     openNow,
+    eager,
     lines,
     count: lines.reduce((n, l) => n + l.qty, 0),
     total: lines.reduce((n, l) => n + l.unit_price * l.qty, 0),
