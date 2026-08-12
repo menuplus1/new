@@ -42,7 +42,15 @@ export async function listSlugs(): Promise<string[]> {
 
 async function fromDb(slug: string): Promise<MenuData | null> {
   const sb = createClient(URL!, KEY!);
-  const { data: r } = await sb.from("restaurants").select("*").eq("slug", slug).eq("active", true).maybeSingle();
+  // أعمدة صريحة: مفتاح anon لم يعد يملك select على owner و whatsapp_phone (0013_lockdown)
+  const { data: r } = await sb
+    .from("restaurants")
+    .select(
+      "id, slug, name, logo_url, primary_color, currency, ordering, order_types, reservations, plan, apps, trial_ends, template, tagline, about, socials, hours, languages, i18n, seo, covers, hide_branding, health_cert",
+    )
+    .eq("slug", slug)
+    .eq("active", true)
+    .maybeSingle();
   if (!r) return null;
 
   // promotions/reviews may not exist until 0006 runs — supabase returns {error} without throwing, so ?? [] keeps us live

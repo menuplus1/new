@@ -2,7 +2,7 @@ import type { MetadataRoute } from "next";
 
 export default function robots(): MetadataRoute.Robots {
   return {
-    rules: { userAgent: "*", allow: "/", disallow: ["/admin", "/sign-in"] },
+    rules: { userAgent: "*", allow: "/", disallow: ["/admin", "/root", "/sign-in"] },
     sitemap: "https://menuplus.rest/sitemap.xml",
   };
 }

@@ -136,7 +136,7 @@ export async function trackVisit(restaurantId: string, kind: "menu" | "cat" | "i
 /* ————— free self-signup: restaurant + owner account in one step ————— */
 
 const SLUG_RE = /^[a-z0-9](?:[a-z0-9-]{1,28}[a-z0-9])$/;
-const RESERVED_SLUGS = new Set(["admin", "sign-in", "sign-up", "api", "sitemap.xml", "robots.txt", "www", "app"]);
+const RESERVED_SLUGS = new Set(["admin", "root", "sign-in", "sign-up", "api", "sitemap.xml", "robots.txt", "www", "app"]);
 
 export async function signUpRestaurant(input: {
   name: string;
