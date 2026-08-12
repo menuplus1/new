@@ -13,6 +13,8 @@ import { Stats } from "./Stats";
 import { Reviews } from "./Reviews";
 import { Store } from "./Store";
 import { Settings } from "./Settings";
+import { Support } from "./Support";
+import { AnnouncementsBar } from "./AnnouncementsBar";
 import type { Rest } from "./ui";
 
 type Line = { name: string; qty: number; unit_price: number };
@@ -50,6 +52,7 @@ const TAB = {
   reviews: "التقييمات",
   store: "المتجر",
   settings: "الإعدادات",
+  support: "الدعم",
 } as const;
 
 type TabKey = keyof typeof TAB;
@@ -63,6 +66,7 @@ const ICON: Record<TabKey, string> = {
   reviews: "⭐",
   store: "🧩",
   settings: "⚙️",
+  support: "🎧",
 };
 
 const HINT: Record<TabKey, string> = {
@@ -74,6 +78,7 @@ const HINT: Record<TabKey, string> = {
   reviews: "آراء الزبائن على صفحة المنيو",
   store: "تطبيقات إضافية تفعّلها على منيوك",
   settings: "هوية المطعم والباقة والإعدادات العامة",
+  support: "تواصل مع فريق منيو بلس",
 };
 
 export default function AdminPage() {
@@ -323,6 +328,8 @@ export default function AdminPage() {
         </header>
 
         <main className="mx-auto w-full max-w-3xl px-5 py-6 lg:px-10 lg:py-10">
+          <AnnouncementsBar key={cur.id} client={client} rest={cur} />
+
           <div className="mb-6">
             <h1 className="text-2xl font-black">{TAB[tab]}</h1>
             <p className="mt-1 text-sm text-[#a6a6a3]">{HINT[tab]}</p>
@@ -407,6 +414,8 @@ export default function AdminPage() {
           {tab === "store" && <Store key={cur.id} client={client} rest={cur} accent={accent} onPatch={patch} />}
 
           {tab === "settings" && <Settings key={cur.id} client={client} cur={cur} patch={patch} accent={accent} />}
+
+          {tab === "support" && <Support key={cur.id} client={client} rest={cur} />}
         </main>
       </div>
     </div>

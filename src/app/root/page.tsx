@@ -7,24 +7,32 @@ import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { sb } from "@/lib/supabase-browser";
-import { platformSession, listSubscriptions } from "@/lib/platform";
+import { platformSession, listSubscriptions, listTickets } from "@/lib/platform";
 import { Logo } from "@/components/Logo";
 import { BRAND, Chip } from "./ui";
 import { Overview } from "./Overview";
 import { Restaurants } from "./Restaurants";
 import { Accounts } from "./Accounts";
 import { Billing } from "./Billing";
+import { Coupons } from "./Coupons";
+import { Templates } from "./Templates";
+import { Announcements } from "./Announcements";
 import { OrdersFeed } from "./OrdersFeed";
+import { Support } from "./Support";
 import { Audit } from "./Audit";
 
-type TabKey = "overview" | "restaurants" | "accounts" | "billing" | "orders" | "audit";
+type TabKey = "overview" | "restaurants" | "accounts" | "billing" | "coupons" | "templates" | "announcements" | "orders" | "support" | "audit";
 
 const TAB: Record<TabKey, { label: string; icon: string; hint: string }> = {
   overview: { label: "نظرة عامة", icon: "📊", hint: "أرقام المنصّة كلها في مكان واحد" },
   restaurants: { label: "المطاعم", icon: "🏪", hint: "كل مطعم مشترك: الباقة والحالة والتحكّم" },
   accounts: { label: "المسجّلون", icon: "👤", hint: "حسابات المستخدمين وارتباطها بالمطاعم" },
   billing: { label: "الاشتراكات", icon: "💳", hint: "التجديدات والفواتير والاشتراكات القاربة على الانتهاء" },
+  coupons: { label: "الكوبونات", icon: "🎟️", hint: "أكواد الخصم وحدود استخدامها" },
+  templates: { label: "القوالب", icon: "🎨", hint: "ظهور القوالب وأسماؤها وألوانها وترتيبها" },
+  announcements: { label: "الإعلانات", icon: "📣", hint: "رسائل وعروض تظهر داخل لوحات المطاعم" },
   orders: { label: "الطلبات", icon: "🛎️", hint: "آخر الطلبات عبر كل المطاعم" },
+  support: { label: "الدعم", icon: "🎧", hint: "تذاكر الدعم من المطاعم" },
   audit: { label: "سجل النشاط", icon: "🧾", hint: "كل تعديل تمّ من هذا الكونسول" },
 };
 
@@ -32,7 +40,8 @@ const GROUPS: { title: string; keys: TabKey[] }[] = [
   { title: "المنصّة", keys: ["overview"] },
   { title: "العملاء", keys: ["restaurants", "accounts"] },
   { title: "المال", keys: ["billing"] },
-  { title: "التشغيل", keys: ["orders"] },
+  { title: "التسويق", keys: ["coupons", "templates", "announcements"] },
+  { title: "التشغيل", keys: ["orders", "support"] },
   { title: "السجل", keys: ["audit"] },
 ];
 
@@ -43,6 +52,7 @@ export default function RootConsole() {
   const [email, setEmail] = useState("");
   const [state, setState] = useState<"loading" | "denied" | "ok">("loading");
   const [expiring, setExpiring] = useState(0);
+  const [unread, setUnread] = useState(0);
   const [tab, setTab] = useState<TabKey>("overview");
   const [navOpen, setNavOpen] = useState(false);
   const [nonce, setNonce] = useState(0); // «تحديث» يعيد تركيب الشاشة الحالية
@@ -60,6 +70,8 @@ export default function RootConsole() {
       setState("ok");
       const subs = await listSubscriptions({ accessToken: t, days: 7 });
       if ("ok" in subs && subs.ok) setExpiring(subs.expiring.length);
+      const tickets = await listTickets({ accessToken: t });
+      if ("ok" in tickets && tickets.ok) setUnread(tickets.tickets.filter((x) => x.unread_platform).length);
     })();
   }, [client, router]);
 
@@ -129,7 +141,7 @@ export default function RootConsole() {
               <div className="space-y-1">
                 {g.keys.map((k) => {
                   const on = tab === k;
-                  const pill = k === "billing" && expiring > 0 ? expiring : 0;
+                  const pill = k === "billing" ? expiring : k === "support" ? unread : 0;
                   return (
                     <button
                       key={k}
@@ -204,7 +216,11 @@ export default function RootConsole() {
             {tab === "restaurants" && <Restaurants key={nonce} token={t} />}
             {tab === "accounts" && <Accounts key={nonce} token={t} />}
             {tab === "billing" && <Billing key={nonce} token={t} />}
+            {tab === "coupons" && <Coupons key={nonce} token={t} />}
+            {tab === "templates" && <Templates key={nonce} token={t} />}
+            {tab === "announcements" && <Announcements key={nonce} token={t} />}
             {tab === "orders" && <OrdersFeed key={nonce} token={t} />}
+            {tab === "support" && <Support key={nonce} token={t} />}
             {tab === "audit" && <Audit key={nonce} token={t} />}
           </main>
         </div>

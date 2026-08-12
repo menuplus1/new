@@ -12,6 +12,7 @@
 
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { PLAN_INFO, effectivePlan, type Plan } from "./plans";
+import { TPLS, TPL_BY_N } from "./templates";
 
 const URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const SERVICE = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -354,5 +355,332 @@ export async function listAudit(input: { accessToken: string; limit?: number }) 
   return asPlatform(input.accessToken, async (sb) => {
     const { data } = await sb.from("platform_audit").select("*").order("created_at", { ascending: false }).limit(input.limit ?? 200);
     return { ok: true as const, rows: data ?? [] };
+  });
+}
+
+/* ————— الدعم الفني ————— */
+
+export type TicketStatus = "open" | "pending" | "closed";
+const TICKET_STATUS: TicketStatus[] = ["open", "pending", "closed"];
+
+export type TicketRow = {
+  id: string;
+  restaurant_id: string;
+  restaurant_name: string;
+  restaurant_slug: string;
+  subject: string;
+  status: TicketStatus;
+  priority: "low" | "normal" | "high";
+  unread_platform: boolean;
+  created_at: string;
+  updated_at: string;
+  messages_count: number;
+  last_message: string | null;
+};
+
+/** لا joins عبر PostgREST — نجلب المطاعم والرسائل ونربط في JS */
+export async function listTickets(input: { accessToken: string; status?: TicketStatus }) {
+  return asPlatform(input.accessToken, async (sb) => {
+    let q = sb.from("support_tickets").select("*").order("updated_at", { ascending: false }).limit(300);
+    if (input.status) q = q.eq("status", input.status);
+    const { data: tickets, error } = await q;
+    if (error) return { ok: false as const, error: error.message };
+    const T = tickets ?? [];
+    const [{ data: rests }, { data: msgs }] = await Promise.all([
+      sb.from("restaurants").select("id, name, slug"),
+      T.length
+        ? sb.from("ticket_messages").select("ticket_id, body, created_at").in("ticket_id", T.map((t) => t.id)).order("created_at", { ascending: true })
+        : Promise.resolve({ data: [] as { ticket_id: string; body: string; created_at: string }[] }),
+    ]);
+    const byRest = new Map((rests ?? []).map((r) => [r.id, r]));
+    const count = new Map<string, number>();
+    const last = new Map<string, string>();
+    for (const m of msgs ?? []) {
+      count.set(m.ticket_id, (count.get(m.ticket_id) ?? 0) + 1);
+      last.set(m.ticket_id, m.body); // مرتّبة تصاعدياً — الأخير يفوز
+    }
+    const rows: TicketRow[] = T.map((t) => ({
+      ...(t as Omit<TicketRow, "restaurant_name" | "restaurant_slug" | "messages_count" | "last_message">),
+      restaurant_name: byRest.get(t.restaurant_id)?.name ?? "—",
+      restaurant_slug: byRest.get(t.restaurant_id)?.slug ?? "",
+      messages_count: count.get(t.id) ?? 0,
+      last_message: last.get(t.id) ?? null,
+    }));
+    return { ok: true as const, tickets: rows };
+  });
+}
+
+/** فتح التذكرة يمسح «جديد من المطعم» — القراءة نفسها هي الإشعار */
+export async function ticketThread(input: { accessToken: string; id: string }) {
+  return asPlatform(input.accessToken, async (sb) => {
+    const { data: ticket } = await sb.from("support_tickets").select("*").eq("id", input.id).maybeSingle();
+    if (!ticket) return { ok: false as const, error: "التذكرة غير موجودة." };
+    const [{ data: messages }, { data: rest }] = await Promise.all([
+      sb.from("ticket_messages").select("*").eq("ticket_id", input.id).order("created_at", { ascending: true }),
+      sb.from("restaurants").select("id, name, slug, plan").eq("id", ticket.restaurant_id).maybeSingle(),
+    ]);
+    if (ticket.unread_platform) await sb.from("support_tickets").update({ unread_platform: false }).eq("id", input.id);
+    return { ok: true as const, ticket: { ...ticket, unread_platform: false, restaurant: rest ?? null }, messages: messages ?? [] };
+  });
+}
+
+export async function replyTicket(input: { accessToken: string; id: string; body: string }) {
+  return asPlatform(input.accessToken, async (sb, admin) => {
+    const body = input.body.trim();
+    if (!body) return { ok: false as const, error: "الرسالة فارغة." };
+    const { data: t } = await sb.from("support_tickets").select("status").eq("id", input.id).maybeSingle();
+    if (!t) return { ok: false as const, error: "التذكرة غير موجودة." };
+    const { error } = await sb.from("ticket_messages").insert({ ticket_id: input.id, sender: "platform", body });
+    if (error) return { ok: false as const, error: error.message };
+    const status: TicketStatus = t.status === "open" ? "pending" : t.status;
+    await sb.from("support_tickets").update({ unread_restaurant: true, unread_platform: false, status, updated_at: iso(new Date()) }).eq("id", input.id);
+    await log(sb, admin, "ticket.reply", input.id, { status });
+    return { ok: true as const };
+  });
+}
+
+export async function setTicketStatus(input: { accessToken: string; id: string; status: TicketStatus }) {
+  return asPlatform(input.accessToken, async (sb, admin) => {
+    if (!TICKET_STATUS.includes(input.status)) return { ok: false as const, error: "حالة غير صالحة." };
+    const { error } = await sb.from("support_tickets").update({ status: input.status, updated_at: iso(new Date()) }).eq("id", input.id);
+    if (error) return { ok: false as const, error: error.message };
+    await log(sb, admin, "ticket.status", input.id, { status: input.status });
+    return { ok: true as const };
+  });
+}
+
+/* ————— الإعلانات ————— */
+
+export type AnnouncementKind = "info" | "offer" | "warning";
+export type Audience = "all" | "plan" | "one";
+
+export async function listAnnouncements(accessToken: string) {
+  return asPlatform(accessToken, async (sb) => {
+    const { data } = await sb.from("announcements").select("*").order("created_at", { ascending: false });
+    const A = data ?? [];
+    const ids = A.map((a) => a.restaurant_id).filter(Boolean);
+    const { data: rests } = ids.length
+      ? await sb.from("restaurants").select("id, name").in("id", ids)
+      : { data: [] as { id: string; name: string }[] };
+    const byId = new Map((rests ?? []).map((r) => [r.id, r.name]));
+    return {
+      ok: true as const,
+      rows: A.map((a) => ({ ...a, restaurant_name: a.restaurant_id ? byId.get(a.restaurant_id) ?? "—" : null })),
+    };
+  });
+}
+
+export async function saveAnnouncement(input: {
+  accessToken: string;
+  id?: string | null;
+  title: string;
+  body: string;
+  kind: AnnouncementKind;
+  audience: Audience;
+  plan?: Plan | null;
+  restaurantId?: string | null;
+  ctaLabel?: string | null;
+  ctaUrl?: string | null;
+  startsAt?: string | null;
+  endsAt?: string | null;
+  active: boolean;
+}) {
+  return asPlatform(input.accessToken, async (sb, admin) => {
+    const title = input.title.trim();
+    const body = input.body.trim();
+    if (title.length < 2 || title.length > 80) return { ok: false as const, error: "العنوان بين حرفين و٨٠ حرفاً." };
+    if (body.length < 2 || body.length > 500) return { ok: false as const, error: "النص بين حرفين و٥٠٠ حرف." };
+    if (input.audience === "plan" && !(input.plan && input.plan in PLAN_INFO)) return { ok: false as const, error: "اختر باقة صالحة." };
+    if (input.audience === "one" && !input.restaurantId) return { ok: false as const, error: "اختر المطعم المستهدف." };
+
+    const row: Record<string, unknown> = {
+      title,
+      body,
+      kind: input.kind,
+      audience: input.audience,
+      plan: input.audience === "plan" ? input.plan : null,
+      restaurant_id: input.audience === "one" ? input.restaurantId : null,
+      cta_label: input.ctaLabel?.trim() || null,
+      cta_url: input.ctaUrl?.trim() || null,
+      ends_at: input.endsAt || null,
+      active: input.active,
+    };
+    if (input.startsAt) row.starts_at = input.startsAt;
+
+    const res = input.id
+      ? await sb.from("announcements").update(row).eq("id", input.id).select("id").maybeSingle()
+      : await sb.from("announcements").insert(row).select("id").maybeSingle();
+    if (res.error) return { ok: false as const, error: res.error.message };
+    await log(sb, admin, "announcement.save", res.data?.id ?? input.id ?? null, { title, audience: input.audience, active: input.active });
+    return { ok: true as const, id: res.data?.id ?? input.id ?? null };
+  });
+}
+
+export async function deleteAnnouncement(input: { accessToken: string; id: string }) {
+  return asPlatform(input.accessToken, async (sb, admin) => {
+    const { error } = await sb.from("announcements").delete().eq("id", input.id);
+    if (error) return { ok: false as const, error: error.message };
+    await log(sb, admin, "announcement.delete", input.id, {});
+    return { ok: true as const };
+  });
+}
+
+/* ————— الكوبونات ————— */
+// الجدول (0011) مفتاحه code وقيمته kind/value وplans[] — الواجهة هنا percent/amount/plan
+// وتُترجم عند الحفظ. لذلك id في هذه الدوال هو الكود نفسه.
+
+export type CouponRow = {
+  id: string;
+  code: string;
+  percent: number | null;
+  amount: number | null;
+  plan: Plan | null;
+  expires_at: string | null;
+  max_uses: number | null;
+  used_count: number;
+  active: boolean;
+  note: string | null;
+  created_at: string;
+};
+
+export async function listCoupons(accessToken: string) {
+  return asPlatform(accessToken, async (sb) => {
+    const [{ data: coupons }, { data: subs }] = await Promise.all([
+      sb.from("coupons").select("*").order("created_at", { ascending: false }),
+      sb.from("subscriptions").select("coupon_code").not("coupon_code", "is", null),
+    ]);
+    const used = new Map<string, number>();
+    for (const s of subs ?? []) used.set(s.coupon_code, (used.get(s.coupon_code) ?? 0) + 1);
+    const rows: CouponRow[] = (coupons ?? []).map((c) => ({
+      id: c.code,
+      code: c.code,
+      percent: c.kind === "percent" ? c.value : null,
+      amount: c.kind === "amount" ? c.value : null,
+      plan: (c.plans?.[0] as Plan) ?? null,
+      expires_at: c.expires_at,
+      max_uses: c.max_uses,
+      used_count: used.get(c.code) ?? 0,
+      active: c.active,
+      note: c.note ?? null,
+      created_at: c.created_at,
+    }));
+    return { ok: true as const, rows };
+  });
+}
+
+export async function saveCoupon(input: {
+  accessToken: string;
+  id?: string | null;
+  code: string;
+  percent?: number | null;
+  amount?: number | null;
+  plan?: Plan | null;
+  expiresAt?: string | null;
+  maxUses?: number | null;
+  active: boolean;
+  note?: string | null;
+}) {
+  return asPlatform(input.accessToken, async (sb, admin) => {
+    const code = input.code.trim().toUpperCase();
+    if (!/^[A-Z0-9-]{3,24}$/.test(code)) return { ok: false as const, error: "الكود من ٣ إلى ٢٤ حرفاً: A-Z و0-9 وشرطة." };
+    const percent = input.percent ?? null;
+    const amount = input.amount ?? null;
+    if ((percent === null) === (amount === null)) return { ok: false as const, error: "حدّد نسبة أو مبلغاً — واحداً فقط." };
+    if (percent !== null && (!Number.isFinite(percent) || percent < 1 || percent > 100)) return { ok: false as const, error: "النسبة بين ١ و١٠٠." };
+    if (amount !== null && (!Number.isFinite(amount) || amount <= 0)) return { ok: false as const, error: "المبلغ أكبر من صفر." };
+    if (input.plan && !(input.plan in PLAN_INFO)) return { ok: false as const, error: "باقة غير صالحة." };
+
+    const row = {
+      code,
+      kind: percent !== null ? "percent" : "amount",
+      value: Math.round((percent ?? amount) as number),
+      plans: input.plan ? [input.plan] : [],
+      expires_at: input.expiresAt || null,
+      max_uses: input.maxUses ?? null,
+      active: input.active,
+      note: input.note?.trim() || null,
+    };
+    // إعادة تسمية الكود = تعديل المفتاح، وغيرها upsert عادي
+    const res = input.id && input.id !== code
+      ? await sb.from("coupons").update(row).eq("code", input.id)
+      : await sb.from("coupons").upsert(row, { onConflict: "code" });
+    if (res.error) return { ok: false as const, error: res.error.message.includes("duplicate") ? "هذا الكود موجود مسبقاً." : res.error.message };
+    await log(sb, admin, "coupon.save", code, { kind: row.kind, value: row.value, plan: input.plan ?? null, active: input.active });
+    return { ok: true as const, code };
+  });
+}
+
+export async function deleteCoupon(input: { accessToken: string; id: string }) {
+  return asPlatform(input.accessToken, async (sb, admin) => {
+    const { error } = await sb.from("coupons").delete().eq("code", input.id);
+    if (error) return { ok: false as const, error: error.message };
+    await log(sb, admin, "coupon.delete", input.id, {});
+    return { ok: true as const };
+  });
+}
+
+/* ————— القوالب ————— */
+// التخطيط شيفرة؛ platform_templates طبقة عرض فوقه (اسم/وصف/لون/ترتيب/إظهار).
+
+export type TemplateRow = {
+  n: number;
+  name: string;
+  description: string;
+  accent: string;
+  sort: number;
+  active: boolean;
+  source: "code" | "override";
+};
+
+export async function listTemplateRows(accessToken: string) {
+  return asPlatform(accessToken, async (sb) => {
+    const { data } = await sb.from("platform_templates").select("*");
+    const byN = new Map((data ?? []).map((t) => [t.n as number, t]));
+    const rows: TemplateRow[] = TPLS.map((t) => {
+      const o = byN.get(t.n);
+      return {
+        n: t.n,
+        name: o?.name ?? t.name,
+        description: o?.description ?? t.desc,
+        accent: o?.accent ?? t.accent,
+        sort: o?.sort ?? 0,
+        active: o?.active ?? true,
+        source: o ? ("override" as const) : ("code" as const),
+      };
+    }).sort((a, b) => a.sort - b.sort || a.n - b.n);
+    return { ok: true as const, rows };
+  });
+}
+
+export async function saveTemplate(input: {
+  accessToken: string;
+  n: number;
+  name?: string | null;
+  description?: string | null;
+  accent?: string | null;
+  sort?: number | null;
+  active: boolean;
+}) {
+  return asPlatform(input.accessToken, async (sb, admin) => {
+    if (!TPL_BY_N[input.n]) return { ok: false as const, error: "رقم قالب غير موجود." };
+    const row: Record<string, unknown> = { n: input.n, active: input.active, updated_at: iso(new Date()) };
+    if (input.name !== undefined) row.name = input.name?.trim() || null;
+    if (input.description !== undefined) row.description = input.description?.trim() || null;
+    if (input.accent !== undefined) row.accent = input.accent?.trim() || null;
+    if (input.sort !== undefined && input.sort !== null) row.sort = Math.round(input.sort);
+    const { error } = await sb.from("platform_templates").upsert(row, { onConflict: "n" });
+    if (error) return { ok: false as const, error: error.message };
+    await log(sb, admin, "template.save", String(input.n), { active: input.active });
+    return { ok: true as const };
+  });
+}
+
+/** حذف صف التخصيص — يعود القالب لِما في الشيفرة */
+export async function resetTemplate(input: { accessToken: string; n: number }) {
+  return asPlatform(input.accessToken, async (sb, admin) => {
+    const { error } = await sb.from("platform_templates").delete().eq("n", input.n);
+    if (error) return { ok: false as const, error: error.message };
+    await log(sb, admin, "template.reset", String(input.n), {});
+    return { ok: true as const };
   });
 }
