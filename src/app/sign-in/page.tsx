@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { Logo } from "@/components/Logo";
 import { sb } from "@/lib/supabase-browser";
 
 const INPUT = { background: "var(--surface-2)", border: "1px solid var(--line)", color: "var(--ink)" } as const;
@@ -39,11 +40,8 @@ export default function SignInPage() {
     <main dir="rtl" className="relative flex min-h-dvh items-center justify-center overflow-hidden p-6" style={{ background: "var(--bg)", color: "var(--ink)" }}>
       <div aria-hidden className="pointer-events-none absolute -left-24 -top-24 h-[480px] w-[480px] rounded-full blur-3xl" style={{ background: "radial-gradient(circle, var(--glow), transparent 65%)" }} />
       <form onSubmit={submit} className="relative w-full max-w-sm rounded-3xl p-7" style={{ background: "var(--surface)", border: "1px solid var(--line)", boxShadow: "var(--shadow-lg)" }}>
-        <Link href="/" className="mb-4 inline-flex items-center gap-2">
-          <span className="flex h-8 w-8 items-center justify-center rounded-[10px]" style={{ background: "var(--grad)" }}>
-            <span className="text-base font-black text-white">+</span>
-          </span>
-          <span className="text-lg font-black">منيو بلس</span>
+        <Link href="/" className="mb-4 inline-flex">
+          <Logo height={40} />
         </Link>
         <h1 className="text-2xl font-extrabold">دخول المطعم</h1>
         <p className="mt-1 text-sm" style={{ color: "var(--ink-soft)" }}>لوحة إدارة المنيو الخاص بك</p>

@@ -5,6 +5,7 @@
  *  useMenu() and render; MenuModals/CartBar are mounted once by the dispatcher. */
 
 import Link from "next/link";
+import { LogoMark } from "@/components/Logo";
 import { createContext, useContext, useEffect, useMemo, useRef, useState } from "react";
 import type { CSSProperties, ReactNode } from "react";
 import type { Category, Lang, MenuData, MenuItem, OrderType, Restaurant } from "@/lib/types";
@@ -382,9 +383,36 @@ export function BrandingFooter() {
         </Link>
       )}
       {showBranding && (
-        <Link href="/" className="text-[11px] font-bold opacity-50">
-          {t("poweredBy")} · menuplus.rest
+        <Link href="/" className="inline-flex flex-col items-center gap-1 opacity-70 transition hover:opacity-100">
+          <span className="text-[11px] font-bold">{t("poweredBy")}</span>
+          <LogoMark size={22} />
         </Link>
+      )}
+    </div>
+  );
+}
+
+/** main photo + extra photos as thumbnails. Mounted with key={item.id} so the
+ *  selection resets by remount — no effect needed. */
+function ItemGallery({ item }: { item: MenuItem }) {
+  const { accent, r } = useMenu();
+  const extra = can(r.plan, "multi_item_images") ? item.images : []; // paywall: DB does not clamp
+  const all = [item.image_url, ...extra].filter(Boolean) as string[];
+  const [i, setI] = useState(0);
+  if (!all.length) return null;
+  return (
+    <div className="mb-4">
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src={all[i]} alt="" loading="lazy" className="h-44 w-full rounded-2xl object-cover" />
+      {all.length > 1 && (
+        <div className="mt-2 flex gap-2 overflow-x-auto [scrollbar-width:none]">
+          {all.map((u, j) => (
+            <button key={j} onClick={() => setI(j)} className="shrink-0 rounded-xl border-2 p-0.5" style={{ borderColor: j === i ? accent : "transparent" }}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={u} alt="" loading="lazy" className="h-12 w-16 rounded-lg object-cover" />
+            </button>
+          ))}
+        </div>
       )}
     </div>
   );
@@ -482,10 +510,7 @@ export function MenuModals() {
       {s.modalItem && (
         <div className="fixed inset-0 z-40 flex items-end justify-center bg-black/60 sm:items-center" onClick={() => s.setModalItem(null)}>
           <div style={DARK} className="max-h-[92dvh] w-full max-w-md overflow-y-auto rounded-t-3xl bg-[var(--panelsoft)] p-5 text-[var(--text)] sm:rounded-3xl" onClick={(e) => e.stopPropagation()}>
-            {s.modalItem.image_url && (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={s.modalItem.image_url} alt="" className="mb-4 h-44 w-full rounded-2xl object-cover" />
-            )}
+            <ItemGallery key={s.modalItem.id} item={s.modalItem} />
             <h2 className="text-lg font-extrabold">{m.name(s.modalItem)}</h2>
             {m.desc(s.modalItem) && <p className="mt-1 text-sm text-[var(--muted)]">{m.desc(s.modalItem)}</p>}
             {s.modalItem.variants.length > 0 && (

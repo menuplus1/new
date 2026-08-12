@@ -2,9 +2,9 @@
 
 import { useCallback, useEffect, useState } from "react";
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { PLAN_INFO, type Plan } from "@/lib/plans";
+import { PLAN_INFO, can, type Plan } from "@/lib/plans";
 import { LANG_LABEL, type I18n, type Lang } from "@/lib/types";
-import { FIELD } from "./ui";
+import { FIELD, LockBadge } from "./ui";
 
 type Variant = { id?: string; name: string; price: number };
 type Item = {
@@ -13,6 +13,7 @@ type Item = {
   name: string;
   description: string | null;
   image_url: string | null;
+  images: string[] | null;
   price: number;
   sort: number;
   active: boolean;
@@ -21,7 +22,8 @@ type Item = {
 };
 type Cat = { id: string; name: string; image_url: string | null; i18n: I18n; sort: number; items: Item[] };
 
-const EMPTY = { name: "", description: "", image_url: "", price: 0, i18n: {} as I18n, variants: [] as Variant[] };
+const MAX_IMAGES = 5;
+const EMPTY = { name: "", description: "", image_url: "", images: [] as string[], price: 0, i18n: {} as I18n, variants: [] as Variant[] };
 
 export function MenuEditor({ client, restaurantId, currency, accent, plan, languages }: { client: SupabaseClient; restaurantId: string; currency: string; accent: string; plan: Plan; languages: Lang[] }) {
   const [cats, setCats] = useState<Cat[]>([]);
@@ -66,6 +68,7 @@ export function MenuEditor({ client, restaurantId, currency, accent, plan, langu
   }
 
   const multi = languages.length > 1;
+  const canImgs = can(plan, "multi_item_images");
   const info = PLAN_INFO[plan];
   const nItems = cats.reduce((s, c) => s + c.items.length, 0);
   const catFull = info.catLimit !== null && cats.length >= info.catLimit;
@@ -128,6 +131,8 @@ export function MenuEditor({ client, restaurantId, currency, accent, plan, langu
       image_url: form.image_url.trim() || null,
       price: Math.max(0, Math.round(form.price)),
     };
+    // untouched when the plan is locked, so a downgrade never wipes stored photos
+    if (canImgs) row.images = form.images.map((u) => u.trim()).filter(Boolean).slice(0, MAX_IMAGES);
     if (multi) {
       // merge only enabled langs, drop empty strings
       const i18n: I18n = {};
@@ -165,13 +170,26 @@ export function MenuEditor({ client, restaurantId, currency, accent, plan, langu
       <p className="text-sm text-[#a6a6a3]">
         الأقسام: {cats.length.toLocaleString("en-US")} من {fmtLim(info.catLimit)} · العناصر: {nItems.toLocaleString("en-US")} من {fmtLim(info.itemLimit)}
       </p>
+      {(itemFull || catFull) && (
+        <div className="rounded-2xl border border-amber-500/40 bg-amber-500/10 p-4">
+          <p className="text-sm font-extrabold text-amber-300">
+            وصلت إلى سقف باقتك — {info.itemLimit !== null ? `${info.itemLimit} صنفاً` : ""}{info.itemLimit !== null && info.catLimit !== null ? " و" : ""}{info.catLimit !== null ? `${info.catLimit} أقسام` : ""}
+          </p>
+          <p className="mt-1 text-xs text-amber-200/80">
+            لإضافة المزيد رقِّ الباقة — القوالب كلها مجانية، لكن حجم المنيو والمميزات على الباقة.
+          </p>
+          <a href="/#pricing" target="_blank" className="mt-3 inline-block rounded-xl px-4 py-2 text-xs font-extrabold text-[#0d0d0d]" style={{ background: accent }}>
+            ترقية الباقة
+          </a>
+        </div>
+      )}
       {err && <p className="text-sm text-red-400">{err}</p>}
 
       <div className="flex gap-2">
         <input value={newCat} onChange={(e) => setNewCat(e.target.value)} onKeyDown={(e) => e.key === "Enter" && addCat()} placeholder="قسم جديد (مثال: المشاوي)" className={field} />
         <button onClick={addCat} disabled={busy || catFull} className="shrink-0 rounded-xl px-4 text-sm font-extrabold text-[#0d0d0d] disabled:opacity-60" style={{ background: accent }}>إضافة قسم</button>
       </div>
-      {catFull && <p className="text-xs text-amber-400">بلغت حدّ باقتك — قم بالترقية.</p>}
+      {catFull && <p className="text-xs text-amber-400">لا يمكن إضافة قسم جديد — رقِّ الباقة.</p>}
 
       {!cats.length && <p className="text-[#a6a6a3]">لا توجد أقسام بعد — ابدأ بإضافة قسم.</p>}
 
@@ -220,7 +238,7 @@ export function MenuEditor({ client, restaurantId, currency, accent, plan, langu
                     <button
                       onClick={() => {
                         setFtab("ar");
-                        setForm({ id: it.id, category_id: c.id, name: it.name, description: it.description ?? "", image_url: it.image_url ?? "", price: it.price, i18n: it.i18n ?? {}, variants: it.variants });
+                        setForm({ id: it.id, category_id: c.id, name: it.name, description: it.description ?? "", image_url: it.image_url ?? "", images: it.images ?? [], price: it.price, i18n: it.i18n ?? {}, variants: it.variants });
                       }}
                       className="rounded-lg border border-white/15 px-2 py-1 text-sm"
                     >
@@ -248,7 +266,7 @@ export function MenuEditor({ client, restaurantId, currency, accent, plan, langu
               >
                 + صنف جديد
               </button>
-              {itemFull && <p className="mt-1 text-xs text-amber-400">بلغت حدّ باقتك — قم بالترقية.</p>}
+              {itemFull && <p className="mt-1 text-xs text-amber-400">لا يمكن إضافة صنف جديد — رقِّ الباقة.</p>}
             </div>
           )}
         </section>
@@ -275,6 +293,21 @@ export function MenuEditor({ client, restaurantId, currency, accent, plan, langu
                 <input value={form.price} onChange={(e) => setForm({ ...form, price: Number(e.target.value) || 0 })} type="number" inputMode="numeric" placeholder="السعر" dir="ltr" className={`${field} mt-2`} />
                 <textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} rows={2} placeholder="الوصف (اختياري)" className={`${field} mt-2`} />
                 <input value={form.image_url} onChange={(e) => setForm({ ...form, image_url: e.target.value })} dir="ltr" placeholder="رابط الصورة (اختياري)" className={`${field} mt-2`} />
+
+                <div className={`mt-4 rounded-xl border border-white/10 p-3 ${canImgs ? "" : "opacity-60"}`}>
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <p className="text-sm font-extrabold">صور إضافية</p>
+                    {!canImgs && <LockBadge feature="multi_item_images" />}
+                  </div>
+                  <p className="mb-2 text-xs text-[#a6a6a3]">تظهر كمصغّرات داخل صفحة الصنف — حتى {MAX_IMAGES} صور بعد الصورة الرئيسية</p>
+                  {form.images.map((u, i) => (
+                    <div key={i} className="mb-2 flex gap-2">
+                      <input value={u} disabled={!canImgs} onChange={(e) => setForm({ ...form, images: form.images.map((x, j) => (j === i ? e.target.value : x)) })} dir="ltr" placeholder="رابط الصورة" className={field} />
+                      <button onClick={() => setForm({ ...form, images: form.images.filter((_, j) => j !== i) })} disabled={!canImgs} className="shrink-0 rounded-xl border border-white/15 px-3 text-red-400 disabled:opacity-40">✕</button>
+                    </div>
+                  ))}
+                  <button onClick={() => setForm({ ...form, images: [...form.images, ""] })} disabled={!canImgs || form.images.length >= MAX_IMAGES} className="w-full rounded-xl border border-white/15 py-2 text-sm font-bold disabled:opacity-40">+ صورة</button>
+                </div>
 
                 <div className="mt-4 rounded-xl border border-white/10 p-3">
                   <p className="text-sm font-extrabold">الأحجام (اختياري)</p>

@@ -98,6 +98,7 @@ export type MenuItem = {
   name: string;
   description: string | null;
   image_url: string | null;
+  images: string[]; // صور إضافية بعد الرئيسية (باقة التميز فما فوق)
   price: number;
   variants: Variant[];
   i18n: I18n;

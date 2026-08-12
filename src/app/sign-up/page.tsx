@@ -3,25 +3,17 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { Logo } from "@/components/Logo";
 import { sb } from "@/lib/supabase-browser";
 import { signUpRestaurant } from "@/lib/actions";
 import { PLAN_INFO, TRIAL_DAYS, iqd, type Plan } from "@/lib/plans";
-import { STARTERS } from "@/lib/starter-menus";
+import { TPLS } from "@/lib/templates";
 import TestimonialsWall from "@/components/landing/TestimonialsWall";
 
 const PLANS: Plan[] = ["free", "basic", "premium", "ultimate"];
 const INPUT = { background: "var(--surface-2)", border: "1px solid var(--line)", color: "var(--ink)" } as const;
 const SLUG_RE = /^[a-z0-9][a-z0-9-]{1,28}[a-z0-9]$/;
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-const TPLS: { n: number; name: string; desc: string; chips: [string, string, string] }[] = [
-  { n: 1, name: "اللوحي الداكن", desc: "أقسام جانبية وشبكة صور — تجربة تابلت", chips: ["شبكة صور", "أقسام جانبية", "داكن"] },
-  { n: 2, name: "بطاقات الأقسام", desc: "غلاف كبير وبطاقة لكل قسم", chips: ["غلاف كبير", "بطاقات أقسام", "فاتح"] },
-  { n: 3, name: "الفاخر", desc: "عاجي وذهبي بلمسة راقية", chips: ["راقٍ", "متعدد اللغات", "لاونج"] },
-  { n: 4, name: "الداكن السريع", desc: "صفحة واحدة وشبكة أصناف", chips: ["سريع", "وجبات سريعة", "داكن"] },
-  { n: 5, name: "المدمج", desc: "قائمة مضغوطة سريعة التصفح", chips: ["مضغوط", "سريع التصفح", "فاتح"] },
-  { n: 6, name: "الدافئ", desc: "ألوان كريمية دافئة", chips: ["دافئ", "مقاهٍ", "مخابز"] },
-];
 
 const STEPS = ["اختر القالب", "بيانات المطعم", "تأكيد وإنشاء"];
 
@@ -32,6 +24,15 @@ function applySavedTheme() {
   else document.documentElement.dataset.theme = t;
 }
 
+/** أسهم SVG — رموز ‹ › تنعكس تلقائياً في RTL فتظهر معكوسة */
+function Chevron({ dir }: { dir: "left" | "right" }) {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden style={{ transform: dir === "left" ? "scaleX(-1)" : undefined }}>
+      <path d="M9 5l7 7-7 7" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
 type Errs = Partial<Record<"name" | "slug" | "email" | "password", string>>;
 
 export default function SignUpPage() {
@@ -39,7 +40,8 @@ export default function SignUpPage() {
   const [plan, setPlan] = useState<Plan>("free");
   const [step, setStep] = useState(1);
   const [slide, setSlide] = useState(1); // القالب المعروض في الكاروسيل
-  const [f, setF] = useState({ name: "", slug: "", color: "#10b3a3", email: "", password: "" });
+  const [f, setF] = useState({ name: "", slug: "", color: TPLS[0].accent, email: "", password: "" });
+  const [colorTouched, setColorTouched] = useState(false); // لمس اللون يدوياً يوقف التتبّع
   const [errs, setErrs] = useState<Errs>({});
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
@@ -54,11 +56,15 @@ export default function SignUpPage() {
   }, []);
 
   const info = PLAN_INFO[plan];
-  const locked = (n: number) => plan === "free" && n !== 1;
-  const template = locked(slide) ? 1 : slide; // الباقة المجانية تبقى على القالب 1
+  const template = slide; // كل القوالب متاحة لكل الباقات
   const shown = TPLS[slide - 1];
+  // القالب يُطبَّق فعلاً: لونه يصبح لون علامة المطعم ما لم يغيّره المستخدم
+  const pick = (n: number) => {
+    setSlide(n);
+    if (!colorTouched) setF((v) => ({ ...v, color: TPLS[n - 1].accent }));
+  };
+  const overLimit = info.itemLimit !== null && shown.items > info.itemLimit;
   const chosen = TPLS[template - 1];
-  const starter = STARTERS[template];
 
   function validate(): boolean {
     const e: Errs = {};
@@ -120,11 +126,8 @@ export default function SignUpPage() {
       <div className="relative z-10 mx-auto w-full max-w-2xl rounded-3xl p-5 sm:p-7" style={{ background: "var(--surface)", border: "1px solid var(--line)", boxShadow: "var(--shadow-lg)" }}>
         {/* ————— header ————— */}
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <Link href="/" className="inline-flex items-center gap-2">
-            <span className="flex h-8 w-8 items-center justify-center rounded-[10px]" style={{ background: "var(--grad)" }}>
-              <span className="text-base font-black text-white">+</span>
-            </span>
-            <span className="text-lg font-black">منيو بلس</span>
+          <Link href="/" className="inline-flex">
+            <Logo height={38} />
           </Link>
           <div className="flex items-center gap-2 rounded-full px-3 py-1.5" style={{ background: "var(--brand-soft)", border: "1px solid var(--line)" }}>
             <span className="text-[12px] font-black">{info.label}</span>
@@ -156,24 +159,28 @@ export default function SignUpPage() {
         {step === 1 && (
           <div className="mt-6">
             <div className="flex items-center justify-center gap-2 sm:gap-4">
-              <button type="button" aria-label="السابق" onClick={() => setSlide(slide === 1 ? 6 : slide - 1)} className="h-10 w-10 shrink-0 rounded-full text-lg font-black" style={{ background: "var(--surface-2)", border: "1px solid var(--line)" }}>›</button>
+              <button type="button" aria-label="السابق" onClick={() => pick(slide === 1 ? TPLS.length : slide - 1)} className="menu-press flex h-10 w-10 shrink-0 items-center justify-center rounded-full" style={{ background: "var(--surface-2)", border: "1px solid var(--line)" }}>
+                <Chevron dir="right" />
+              </button>
 
               <div className="relative mx-auto aspect-[9/19] w-full max-w-[300px] overflow-hidden rounded-[28px]" style={{ border: "1px solid var(--line)", background: "#101012", boxShadow: "var(--shadow-md)" }}>
                 <iframe
                   key={slide}
-                  src={`/sham?tpl=${slide}&preview=1`}
+                  src={`${shown.preview}${shown.preview.includes("?") ? "&" : "?"}preview=1`}
                   title={`معاينة ${shown.name}`}
                   loading="lazy"
                   tabIndex={-1}
                   className="pointer-events-none absolute left-0 top-0 origin-top-left"
                   style={{ width: "250%", height: "250%", transform: "scale(0.4)", border: 0 }}
                 />
-                <span className="absolute top-2 start-2 rounded-full px-3 py-1 text-[11px] font-black text-white" style={{ background: slide === 1 ? "var(--grad)" : "rgba(0,0,0,.55)" }}>
-                  {slide === 1 ? "مجاني دائماً" : locked(slide) ? "للباقات المدفوعة" : "متاح لك"}
+                <span className="absolute top-2 start-2 rounded-full px-3 py-1 text-[11px] font-black text-white" style={{ background: "var(--grad)" }}>
+                  متاح في كل الباقات
                 </span>
               </div>
 
-              <button type="button" aria-label="التالي" onClick={() => setSlide(slide === 6 ? 1 : slide + 1)} className="h-10 w-10 shrink-0 rounded-full text-lg font-black" style={{ background: "var(--surface-2)", border: "1px solid var(--line)" }}>‹</button>
+              <button type="button" aria-label="التالي" onClick={() => pick(slide === TPLS.length ? 1 : slide + 1)} className="menu-press flex h-10 w-10 shrink-0 items-center justify-center rounded-full" style={{ background: "var(--surface-2)", border: "1px solid var(--line)" }}>
+                <Chevron dir="left" />
+              </button>
             </div>
 
             <div className="mt-4 text-center">
@@ -184,29 +191,29 @@ export default function SignUpPage() {
                   <span key={c} className="rounded-full px-3 py-1 text-[11px] font-bold" style={{ background: "var(--surface-2)", border: "1px solid var(--line)", color: "var(--ink-soft)" }}>{c}</span>
                 ))}
               </div>
-              {locked(slide) && (
-                <p className="mt-3 text-[12px] font-bold" style={{ color: "var(--brand-deep)" }}>
-                  هذا القالب للباقات المدفوعة — سيُطبَّق القالب 1 (اللوحي الداكن).{" "}
-                  <Link href="/#pricing" className="underline">ترقية الباقة</Link>
+              {overLimit && (
+                <p className="mt-3 text-[12px] font-bold" style={{ color: "#eab308" }}>
+                  هذا القالب يبدأ بـ{shown.items} صنفاً، وباقتك تسع {info.itemLimit} — سيُزرع أول {info.itemLimit} صنفاً فقط.{" "}
+                  <Link href="/#pricing" className="underline">رقِّ الباقة لتأخذه كاملاً</Link>
                 </p>
               )}
             </div>
 
-            <div className="mt-4 flex items-center justify-center gap-2">
+            <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
               {TPLS.map((tp) => (
                 <button
                   key={tp.n}
                   type="button"
                   aria-label={`القالب ${tp.n}`}
-                  onClick={() => setSlide(tp.n)}
+                  onClick={() => pick(tp.n)}
                   className="h-2.5 rounded-full transition-all"
-                  style={{ width: slide === tp.n ? 26 : 10, background: slide === tp.n ? "var(--brand)" : "var(--line)", opacity: locked(tp.n) ? 0.5 : 1 }}
+                  style={{ width: slide === tp.n ? 26 : 10, background: slide === tp.n ? "var(--brand)" : "var(--line)" }}
                 />
               ))}
             </div>
 
             <p className="mt-4 text-center text-[12px]" style={{ color: "var(--ink-soft)" }}>
-              يبدأ المنيو الخاص بك بأصناف وأسعار جاهزة تعدّلها بضغطة.
+              يبدأ المنيو الخاص بك بأصناف وأسعار وصور جاهزة — تعدّلها بضغطة، ولا يبقى عليك إلا الاسم والشعار.
             </p>
           </div>
         )}
@@ -233,7 +240,7 @@ export default function SignUpPage() {
             </div>
             <label className="flex items-center justify-between rounded-xl px-3 py-2.5 text-sm" style={INPUT}>
               <span style={{ color: "var(--ink-soft)" }}>لون العلامة</span>
-              <input type="color" value={f.color} onChange={(e) => setF({ ...f, color: e.target.value })} className="h-8 w-14 cursor-pointer rounded border-0 bg-transparent" />
+              <input type="color" value={f.color} onChange={(e) => { setColorTouched(true); setF({ ...f, color: e.target.value }); }} className="h-8 w-14 cursor-pointer rounded border-0 bg-transparent" />
             </label>
             {field("email", { type: "email", dir: "ltr", placeholder: "البريد الإلكتروني" })}
             {field("password", { type: "password", dir: "ltr", placeholder: "كلمة المرور (8 أحرف فأكثر)" })}
@@ -264,13 +271,13 @@ export default function SignUpPage() {
 
             <p className="mt-4 text-[13px] font-extrabold">المنيو الجاهز</p>
             <div className="mt-2 flex flex-wrap gap-2">
-              {starter?.cats.map((c) => (
-                <span key={c.name} className="rounded-full px-3 py-1.5 text-[12px] font-bold" style={{ background: "var(--brand-soft)", border: "1px solid var(--line)" }}>
-                  {c.name} · {c.items.length} أصناف
+              {chosen.cats.map((c) => (
+                <span key={c} className="rounded-full px-3 py-1.5 text-[12px] font-bold" style={{ background: "var(--brand-soft)", border: "1px solid var(--line)" }}>
+                  {c}
                 </span>
               ))}
             </div>
-            <p className="mt-2 text-[11px]" style={{ color: "var(--ink-soft)" }}>كل الأصناف والأسعار قابلة للتعديل من لوحة التحكم.</p>
+            <p className="mt-2 text-[11px]" style={{ color: "var(--ink-soft)" }}>{chosen.items} صنفاً بصورها وأسعارها — كلها قابلة للتعديل من لوحة التحكم.</p>
 
             {err && <p className="mt-3 text-sm text-red-500">{err}</p>}
 

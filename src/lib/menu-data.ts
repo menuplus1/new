@@ -11,7 +11,8 @@ const hasDb = () => Boolean(URL && KEY);
 export async function getMenu(slug: string): Promise<MenuData | null> {
   if (!hasDb()) return DEMO[slug] ?? null;
   try {
-    return await fromDb(slug);
+    // a demo slug has no DB row — fall back so the template previews resolve
+    return (await fromDb(slug)) ?? DEMO[slug] ?? null;
   } catch {
     return DEMO[slug] ?? null;
   }
@@ -47,7 +48,7 @@ async function fromDb(slug: string): Promise<MenuData | null> {
   // promotions/reviews may not exist until 0006 runs — supabase returns {error} without throwing, so ?? [] keeps us live
   const [{ data: cats }, { data: items }, { data: vars }, { data: promos }, { data: reviews }] = await Promise.all([
     sb.from("categories").select("id, name, image_url, i18n, sort").eq("restaurant_id", r.id).eq("active", true).order("sort"),
-    sb.from("menu_items").select("id, category_id, name, description, image_url, price, i18n, sort").eq("restaurant_id", r.id).eq("active", true).order("sort"),
+    sb.from("menu_items").select("id, category_id, name, description, image_url, images, price, i18n, sort").eq("restaurant_id", r.id).eq("active", true).order("sort"),
     sb.from("item_variants").select("id, item_id, name, price").eq("restaurant_id", r.id),
     sb.from("promotions").select("id, title, description, image_url").eq("restaurant_id", r.id).eq("active", true).order("sort"),
     sb.from("reviews").select("stars").eq("restaurant_id", r.id).eq("approved", true),
@@ -71,6 +72,7 @@ async function fromDb(slug: string): Promise<MenuData | null> {
         name: it.name,
         description: it.description,
         image_url: it.image_url,
+        images: it.images ?? [],
         price: it.price,
         variants: varsByItem.get(it.id) ?? [],
         i18n: it.i18n ?? {},

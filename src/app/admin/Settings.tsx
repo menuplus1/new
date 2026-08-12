@@ -6,16 +6,17 @@ import { CARD, FIELD, LockBadge, Toggle, type Rest } from "./ui";
 import { PLAN_INFO, can, hasApp, iqd } from "@/lib/plans";
 import { DAY_NAMES, LANG_LABEL, ORDER_TYPE_LABEL, type DayHours, type Lang, type OrderType } from "@/lib/types";
 import { addAdmin, removeAdmin } from "@/lib/actions";
+import { TPLS } from "@/lib/templates";
+import { ODD_META_BY_TPL } from "@/lib/odd-meta";
 
 const ALL_TYPES: OrderType[] = ["dine_in", "delivery", "takeaway"];
 const ALL_LANGS: Lang[] = ["ar", "en", "ckb"];
 const SUM = "cursor-pointer font-extrabold";
 
-/** tiny css sketches of the 6 menu templates */
-const TPLS: { n: number; name: string; sketch: React.ReactNode }[] = [
+/** tiny css sketches of the 6 built-in templates; 7–16 get a generated mini */
+const SKETCHES: { n: number; sketch: React.ReactNode }[] = [
   {
     n: 1,
-    name: "اللوحي الداكن",
     sketch: (
       <div className="flex h-[60px] gap-1 rounded-lg bg-[#0d0d0d] p-1.5">
         <div className="w-3 rounded bg-white/25" />
@@ -28,7 +29,6 @@ const TPLS: { n: number; name: string; sketch: React.ReactNode }[] = [
   },
   {
     n: 2,
-    name: "بطاقات الأقسام",
     sketch: (
       <div className="h-[60px] space-y-1 rounded-lg bg-[#141416] p-1.5">
         <div className="h-3.5 rounded bg-white/25" />
@@ -39,7 +39,6 @@ const TPLS: { n: number; name: string; sketch: React.ReactNode }[] = [
   },
   {
     n: 3,
-    name: "الفاخر",
     sketch: (
       <div className="h-[60px] rounded-lg bg-[#17130e] p-1.5">
         <div className="mx-auto h-2 w-1/2 rounded bg-amber-300/60" />
@@ -50,7 +49,6 @@ const TPLS: { n: number; name: string; sketch: React.ReactNode }[] = [
   },
   {
     n: 4,
-    name: "الداكن السريع",
     sketch: (
       <div className="grid h-[60px] grid-cols-3 gap-1 rounded-lg bg-[#0d0d0d] p-1.5">
         <div className="rounded bg-white/25" />
@@ -64,7 +62,6 @@ const TPLS: { n: number; name: string; sketch: React.ReactNode }[] = [
   },
   {
     n: 5,
-    name: "المدمج",
     sketch: (
       <div className="h-[60px] space-y-1 rounded-lg bg-[#141416] p-1.5">
         <div className="h-2 rounded bg-white/25" />
@@ -76,7 +73,6 @@ const TPLS: { n: number; name: string; sketch: React.ReactNode }[] = [
   },
   {
     n: 6,
-    name: "الدافئ",
     sketch: (
       <div className="h-[60px] rounded-lg bg-[#2a1f16] p-1.5">
         <div className="h-6 rounded-lg bg-orange-300/30" />
@@ -85,6 +81,27 @@ const TPLS: { n: number; name: string; sketch: React.ReactNode }[] = [
     ),
   },
 ];
+
+/** مصغّر قوالب «الورقة» (٧–١٦): غلاف + شعار دائري + بطاقتا قسمين بلون القالب */
+function OddMini({ n }: { n: number }) {
+  const s = ODD_META_BY_TPL[n];
+  if (!s) return null;
+  const dark = s.skin === "dark";
+  return (
+    <div className="h-[60px] overflow-hidden rounded-lg p-0 pb-1" style={{ background: dark ? "#272727" : "#f3f1ef" }}>
+      <div className="relative h-4" style={{ background: s.accent, opacity: 0.75 }}>
+        <span className="absolute -bottom-1.5 left-1/2 size-3 -translate-x-1/2 rounded-full" style={{ background: dark ? "#181818" : "#fff" }} />
+      </div>
+      <div className="mx-1 -mt-0.5 space-y-1 rounded-t-md p-1" style={{ background: dark ? "#181818" : "#fff" }}>
+        <div className="h-1.5 w-1/2 rounded" style={{ background: s.accent, opacity: 0.5 }} />
+        <div className="h-3.5 rounded" style={{ background: s.accent, opacity: 0.3 }} />
+        <div className="h-3.5 rounded" style={{ background: s.accent, opacity: 0.18 }} />
+      </div>
+    </div>
+  );
+}
+
+const sketchOf = (n: number) => SKETCHES.find((s) => s.n === n)?.sketch ?? <OddMini n={n} />;
 
 const DEFAULT_HOURS = (): DayHours[] => Array.from({ length: 7 }, () => ({ closed: false, open: "09:00", close: "23:00" }));
 
@@ -226,15 +243,16 @@ export function Settings({ client, cur, patch, accent }: { client: SupabaseClien
                 className={`rounded-xl border p-2 ${locked ? "cursor-not-allowed opacity-40" : "cursor-pointer"} ${sel ? "" : "border-white/10"}`}
                 style={sel ? { borderColor: accent, background: `${accent}1a` } : undefined}
               >
-                {t.sketch}
-                <div className="mt-1.5 flex items-center justify-between">
-                  <span className="text-[12px] font-bold">{t.name}</span>
+                {sketchOf(t.n)}
+                <div className="mt-1.5 flex items-center justify-between gap-1">
+                  <span className="truncate text-[12px] font-bold">{t.n}. {t.name}</span>
                   <a href={`/${cur.slug}?tpl=${t.n}`} target="_blank" onClick={(e) => e.stopPropagation()} className="text-[11px] text-[#a6a6a3] underline">معاينة</a>
                 </div>
               </div>
             );
           })}
         </div>
+        <p className="mt-2 text-[11px] text-[#a6a6a3]">القوالب ٧–١٦ تغيّر شكل المنيو فقط — أصنافك وأقسامك تبقى كما هي (المنيو الجاهز يُزرع عند التسجيل).</p>
       </details>
 
       {/* 3 ————— الهوية ————— */}

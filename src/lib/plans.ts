@@ -39,7 +39,7 @@ const MIN: Record<Feature, Plan> = {
   no_ads: "basic",
   stats: "basic",
   seo: "basic",
-  templates: "basic",
+  templates: "free", // كل القوالب مجانية — الباقة تبيع المميزات لا الشكل
   languages: "basic",
   about: "basic",
   hours: "basic",

@@ -4,6 +4,8 @@ import { createClient } from "@supabase/supabase-js";
 import { orderProblem, reservationProblem, reviewProblem, type OrderType } from "./types";
 import { PLAN_INFO, TRIAL_DAYS, effectivePlan, hasApp, type Plan } from "./plans";
 import { STARTERS } from "./starter-menus";
+import { oddStarter } from "./odd-build";
+import { clampTpl } from "./templates";
 import { notifyNewOrder, notifyNewReservation } from "./notify";
 
 /** unit_price/name are used for the demo receipt only — the DB rpc resolves
@@ -162,13 +164,18 @@ export async function signUpRestaurant(input: {
     const { data: taken } = await sb.from("restaurants").select("id").eq("slug", slug).maybeSingle();
     if (taken) return { ok: false, error: "هذا الرابط محجوز — جرّب اسماً آخر." };
 
+    // resolve the template + its starter BEFORE creating the account, so a bad
+    // template number can't strand an ownerless auth user.
+    // free plan is locked to the always-free template (mirrors the DB clamp in 0005)
+    const template = input.plan === "free" ? 1 : clampTpl(input.template);
+    // 7–16 ship a full cloned menu — trim it to the plan's limits or the DB triggers reject the insert
+    const limits = PLAN_INFO[input.plan];
+    const starter = STARTERS[template] ?? oddStarter(template, limits.catLimit, limits.itemLimit);
+    if (!starter) return { ok: false, error: "قالب غير معروف." };
+
     const created = await sb.auth.admin.createUser({ email, password: input.password, email_confirm: true });
     if (created.error || !created.data.user)
       return { ok: false, error: created.error?.message.includes("already") ? "هذا البريد مسجّل مسبقاً — سجّل دخولك." : (created.error?.message ?? "تعذّر إنشاء الحساب.") };
-
-    // free plan is locked to the always-free template (mirrors the DB clamp in 0005)
-    const template = input.plan === "free" ? 1 : Math.min(6, Math.max(1, Math.round(input.template) || 1));
-    const starter = STARTERS[template];
 
     // paid plans start as a 7-day trial (no payment integration yet); free is forever
     const { data: rest, error } = await sb
@@ -181,7 +188,7 @@ export async function signUpRestaurant(input: {
         plan: input.plan,
         trial_ends: input.plan === "free" ? null : new Date(Date.now() + TRIAL_DAYS * 86400000).toISOString(),
         template,
-        covers: [starter.cover],
+        covers: starter.cover ? [starter.cover] : [],
         hours: Array.from({ length: 7 }, () => ({ closed: false, open: "09:00", close: "23:00" })),
         owner: created.data.user.id,
       })

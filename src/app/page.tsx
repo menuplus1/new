@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { Nav, Reveal, Stat, TenantSwitcher, LiveMenuBoard, Faq, ThemeSwitcher, Pricing } from "@/components/landing/islands";
+import { Logo } from "@/components/Logo";
 import { MenuPreview, type PreviewData } from "@/components/landing/MenuPreview";
+import { TPLS } from "@/lib/templates";
 
 export const dynamic = "force-dynamic";
 
@@ -236,16 +238,6 @@ const DEEP = [
   },
 ];
 
-/* ————— template showcase: 6 hand-drawn CSS minis ————— */
-const TPLS = [
-  { n: 1, name: "اللوحي الداكن", desc: "أقسام جانبية + شبكة صور — تجربة تابلت", free: true, example: "https://pizzara-modern.netlify.app/menu" },
-  { n: 2, name: "بطاقات الأقسام", desc: "غلاف كبير وبطاقات صور لكل قسم" },
-  { n: 3, name: "الفاخر", desc: "عاجيّ وذهبي بلمسة راقية" },
-  { n: 4, name: "الداكن السريع", desc: "صفحة واحدة وشبكة أصناف — وجبات سريعة" },
-  { n: 5, name: "المدمج", desc: "قائمة مضغوطة سريعة التصفح" },
-  { n: 6, name: "الدافئ", desc: "ألوان كريمية دافئة — مقاهٍ ومخابز" },
-];
-
 /* ————— the interconnected feature set, at a glance ————— */
 const ALL_FEATURES = [
   ["📱", "منيو QR بالصور", "بدون تطبيق — يفتح برقم الطاولة"],
@@ -259,7 +251,7 @@ const ALL_FEATURES = [
   ["🎁", "العروض الترويجية", "شريط عروض أعلى المنيو"],
   ["👥", "عدة مشرفين", "حتى 10 حسابات لفريقك"],
   ["🔎", "SEO", "مطعمك يظهر في نتائج البحث"],
-  ["🎨", "6 قوالب", "بدّل شكل المنيو الخاص بك بضغطة"],
+  ["🎨", "16 قالباً", "عشرة منها بمنيو جاهز — بدّل بضغطة"],
 ] as const;
 
 export default function Landing() {
@@ -499,10 +491,10 @@ export default function Landing() {
           <Reveal className="mx-auto mb-12 max-w-2xl text-center">
             <div className="flex justify-center"><Eyebrow>القوالب</Eyebrow></div>
             <h2 className="mt-4 text-[clamp(1.9rem,4vw,3.1rem)] font-black leading-tight" style={{ color: "var(--ink)" }}>
-              6 قوالب — <span className="brand-text">المنيو الخاص بك بالشكل الذي يليق بك</span>
+              {TPLS.length} قوالب — <span className="brand-text">المنيو الخاص بك بالشكل الذي يليق بك</span>
             </h2>
             <p className="mt-4 text-[15px]" style={{ color: "var(--ink-soft)" }}>
-              نفس المنيو الخاص بك وبياناتك، بستّة أشكال مختلفة — بدّل بينها من لوحة التحكم بضغطة واحدة.
+              ستّة أشكال من تصميمنا، وعشرة قوالب تأتي بمنيو جاهز كامل (أقسامه وأصنافه وصورها) — لا يبقى عليك إلا تغيير الاسم والشعار.
             </p>
           </Reveal>
 
@@ -513,14 +505,14 @@ export default function Landing() {
                   {/* the real template, live — same page a customer sees, scaled to fit */}
                   <div className="relative h-80 overflow-hidden rounded-[20px]" style={{ border: "1px solid var(--line)", background: "#101012" }}>
                     <iframe
-                      src={`/sham?tpl=${tp.n}&preview=1`}
+                      src={`${tp.preview}${tp.preview.includes("?") ? "&" : "?"}preview=1`}
                       title={tp.name}
                       loading="lazy"
                       tabIndex={-1}
                       className="pointer-events-none absolute left-0 top-0 origin-top-left"
                       style={{ width: "200%", height: "200%", transform: "scale(0.5)", border: 0 }}
                     />
-                    <a href={`/sham?tpl=${tp.n}`} target="_blank" className="absolute inset-0" aria-label={`معاينة ${tp.name}`} />
+                    <a href={tp.preview} target="_blank" className="absolute inset-0" aria-label={`معاينة ${tp.name}`} />
                     <span className="absolute top-2 start-2 rounded-full px-3 py-1 text-[11px] font-black text-white" style={{ background: tp.free ? "var(--grad)" : "rgba(0,0,0,.55)" }}>
                       {tp.free ? "مجاني دائماً" : "الباقات المدفوعة"}
                     </span>
@@ -530,7 +522,7 @@ export default function Landing() {
                   </h3>
                   <p className="mt-1 flex-1 text-[13px] leading-6" style={{ color: "var(--ink-soft)" }}>{tp.desc}</p>
                   <div className="mt-4 flex flex-wrap items-center gap-2">
-                    <a href={`/sham?tpl=${tp.n}`} target="_blank" className="rounded-full px-4 py-2 text-[13px] font-bold text-white" style={{ background: "var(--grad)" }}>
+                    <a href={tp.preview} target="_blank" className="rounded-full px-4 py-2 text-[13px] font-bold text-white" style={{ background: "var(--grad)" }}>
                       معاينة حيّة
                     </a>
                     {tp.example && (
@@ -723,12 +715,7 @@ export default function Landing() {
         <div className="mx-auto max-w-7xl px-6 py-14">
           <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
             <div>
-              <div className="flex items-center gap-2.5">
-                <span className="flex h-9 w-9 items-center justify-center rounded-[11px]" style={{ background: "var(--grad)" }}>
-                  <span className="text-lg font-black text-white">+</span>
-                </span>
-                <span className="text-2xl font-black" style={{ color: "var(--on-deep)" }}>منيو بلس</span>
-              </div>
+              <Logo height={54} tone="light" />
               <p className="mt-4 max-w-xs text-[13px] leading-7" style={{ color: "var(--on-deep-soft)" }}>
                 منيو بلس — منصّة المنيو الرقمي للمطاعم والمقاهي: قائمة QR أنيقة، طلبات وحجوزات، بلونك ونطاقك الخاص.
               </p>

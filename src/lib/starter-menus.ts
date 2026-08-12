@@ -6,11 +6,11 @@ import { IMG } from "./food-images";
  *  Every set fits the free limits (≤5 categories / ≤15 items) so the DB count
  *  triggers never block a fresh signup. */
 
-type Item = [name: string, price: number, image: string, desc?: string];
+type Item = [name: string, price: number, image: string | null, desc?: string];
 export type Starter = {
   label: string; // what this starter is, shown in the signup summary
   cover: string;
-  cats: { name: string; tile: string; items: Item[] }[];
+  cats: { name: string; tile: string | null; items: Item[] }[];
 };
 
 /** مطعم عراقي — مشاوي وأكلات بيتية */
@@ -227,7 +227,8 @@ const bakery: Starter = {
   ],
 };
 
-/** template number → its starter (1 اللوحي، 2 بطاقات الأقسام، 3 الفاخر، 4 الداكن السريع، 5 المدمج، 6 الدافئ) */
+/** template number → its starter (1 اللوحي، 2 بطاقات الأقسام، 3 الفاخر، 4 الداكن السريع، 5 المدمج، 6 الدافئ).
+ *  القوالب ٧–١٦ منيوهاتها منسوخة عن مطاعم حقيقية وتُبنى في odd-build (بيانات كبيرة، للسيرفر فقط). */
 export const STARTERS: Record<number, Starter> = {
   1: iraqiGrill,
   2: iraqiGrill,

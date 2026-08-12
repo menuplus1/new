@@ -1,14 +1,19 @@
 import type { Metadata } from "next";
-import { Tajawal } from "next/font/google";
+import { Amiri, Cairo, Rubik, Tajawal } from "next/font/google";
 import "./globals.css";
 
-// Single family across the whole platform — clean, modern, "system" feel.
+// Platform default — clean, modern, "system" feel.
 const tajawal = Tajawal({
   subsets: ["arabic", "latin"],
   weight: ["400", "500", "700", "800", "900"],
   variable: "--font-tajawal",
   display: "swap",
 });
+
+// Menu templates pick their own personality from these (see src/components/menu).
+const cairo = Cairo({ subsets: ["arabic", "latin"], weight: ["400", "600", "700", "900"], variable: "--font-cairo", display: "swap" });
+const amiri = Amiri({ subsets: ["arabic", "latin"], weight: ["400", "700"], variable: "--font-amiri", display: "swap" });
+const rubik = Rubik({ subsets: ["arabic", "latin"], weight: ["400", "500", "600", "700", "900"], variable: "--font-rubik", display: "swap" });
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://menuplus.rest"),
@@ -25,7 +30,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="ar" dir="rtl" className={`${tajawal.variable} h-full antialiased`}>
+    <html lang="ar" dir="rtl" className={`${tajawal.variable} ${cairo.variable} ${amiri.variable} ${rubik.variable} h-full antialiased`}>
       <body className="min-h-full">{children}</body>
     </html>
   );

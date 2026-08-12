@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, type ReactNode, type CSSProperties } from "react";
+import { Logo } from "@/components/Logo";
 import { MenuPreview, type PreviewData } from "./MenuPreview";
 import { PLAN_INFO, YEARLY_MONTHS, iqd } from "@/lib/plans";
 
@@ -76,11 +77,8 @@ export function Nav() {
       }}
     >
       <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
-        <a href="#top" className="flex items-center gap-2.5">
-          <span className="flex h-9 w-9 items-center justify-center rounded-[11px]" style={{ background: "var(--grad)", boxShadow: "var(--shadow-brand)" }}>
-            <span className="text-lg font-black" style={{ color: "#fff" }}>+</span>
-          </span>
-          <span className="text-2xl font-black leading-none" style={{ color: solid ? "var(--ink)" : "var(--ink)" }}>منيو بلس</span>
+        <a href="#top" className="flex items-center">
+          <Logo height={42} />
         </a>
 
         <nav className="hidden items-center gap-8 md:flex">
@@ -410,7 +408,7 @@ const FEATURES: { label: string; v: [Cell, Cell, Cell, Cell] }[] = [
   { label: "لا تتضمن إعلانات", v: [false, true, true, true] },
   { label: "احصائيات متقدمة", v: [false, true, true, true] },
   { label: "Seo تحسين ظهور محركات البحث", v: [false, true, true, true] },
-  { label: "تعدد طرق العرض", v: [false, true, true, true] },
+  { label: "تعدد طرق العرض (كل القوالب)", v: [true, true, true, true] },
   { label: "تعدد اللغات", v: [false, true, true, true] },
   { label: "نبذة عنا", v: [false, true, true, true] },
   { label: "أوقات العمل", v: [false, true, true, true] },
@@ -490,19 +488,20 @@ export function Pricing() {
             <ul className="flex-1 space-y-3 border-t px-5 py-5" style={{ borderColor: "var(--line)" }}>
               {shown.map((f) => {
                 const cell = f.v[i];
-                const on = cell === true || typeof cell === "string";
+                const store = cell === "store"; // تطبيق يُفعَّل من المتجر — لا هو مضمّن ولا ممنوع
+                const on = cell === true || (typeof cell === "string" && !store);
                 return (
                   <li key={f.label} className="flex items-start gap-2.5 text-[13.5px] leading-6" style={{ color: on ? "var(--ink)" : "var(--ink-soft)" }}>
                     <span
                       aria-hidden
                       className="mt-0.5 flex h-5 w-5 flex-none items-center justify-center rounded-full text-[11px] text-white"
-                      style={{ background: on ? "var(--grad)" : "color-mix(in srgb, var(--ink-soft) 45%, transparent)" }}
+                      style={{ background: store ? "#eab308" : on ? "var(--grad)" : "color-mix(in srgb, var(--ink-soft) 45%, transparent)" }}
                     >
-                      {on ? "✓" : "✕"}
+                      {store ? "+" : on ? "✓" : "✕"}
                     </span>
                     <span>
-                      {typeof cell === "string" ? cell : f.label}
-                      {cell === "store" && <span className="text-[12px] opacity-70"> (متاح بالمتجر)</span>}
+                      {typeof cell === "string" && !store ? cell : f.label}
+                      {store && <span className="text-[12px] opacity-70"> (يُفعَّل من المتجر)</span>}
                     </span>
                   </li>
                 );

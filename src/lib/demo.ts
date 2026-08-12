@@ -1,4 +1,5 @@
 import { IMG } from "./food-images";
+import { oddDemos } from "./odd-build";
 import type { Category, DayHours, MenuData } from "./types";
 
 /** Demo tenants — the platform renders these when no database is connected yet,
@@ -7,7 +8,7 @@ import type { Category, DayHours, MenuData } from "./types";
  *  dallah = الباقة الأساسية (منيو للعرض فقط، لغتان، قالب مدمج) —
  *  sham   = الباقة الشاملة (كل الميزات: طلبات، حجز، عروض، تقييمات، ٣ لغات). */
 
-type Row = [name: string, price: number, image: string, en?: string, desc?: string];
+type Row = [name: string, price: number, image: string, en?: string, desc?: string, extra?: string[]];
 
 function cat(name: string, en: string, tile: string, items: Row[]): Category {
   return {
@@ -15,11 +16,12 @@ function cat(name: string, en: string, tile: string, items: Row[]): Category {
     name,
     image_url: tile,
     i18n: { en: { name: en } },
-    items: items.map(([n, p, img, e, d], i) => ({
+    items: items.map(([n, p, img, e, d, extra], i) => ({
       id: `${name}-${i}`,
       name: n,
       description: d ?? null,
       image_url: img,
+      images: extra ?? [],
       price: p,
       variants: [],
       i18n: e ? { en: { name: e } } : {},
@@ -117,15 +119,15 @@ export const DEMO: Record<string, MenuData> = {
     },
     categories: [
       cat("المقبلات", "Starters", IMG.mezze, [
-        ["مقبلات مشكّلة", 5000, IMG.mezze, "Mezze", "حمص · متبل · مخللات"],
+        ["مقبلات مشكّلة", 5000, IMG.mezze, "Mezze", "حمص · متبل · مخللات", [IMG.salad, IMG.samosa]],
         ["سمبوسة", 2000, IMG.samosa, "Samosa", "٤ حبات"],
         ["سلطة عراقية", 2500, IMG.salad, "Iraqi Salad"],
       ]),
       cat("المشاوي", "Grills", IMG.kebab, [
-        ["كباب عراقي", 12000, IMG.kebab, "Iraqi Kebab", "لحم غنم على الفحم"],
+        ["كباب عراقي", 12000, IMG.kebab, "Iraqi Kebab", "لحم غنم على الفحم", [IMG.grilledPlate, IMG.tikka]],
         ["تكة لحم", 13000, IMG.tikka, "Lamb Tikka"],
         ["شيش طاووق", 10000, IMG.grilledPlate, "Shish Tawook"],
-        ["مشاوي مشكّلة", 22000, IMG.mixedGrill, "Mixed Grill", "تكفي شخصين"],
+        ["مشاوي مشكّلة", 22000, IMG.mixedGrill, "Mixed Grill", "تكفي شخصين", [IMG.ribs, IMG.grilledChicken]],
       ]),
       cat("الأطباق الرئيسية", "Mains", IMG.tashreeb, [
         ["تشريب", 9000, IMG.tashreeb, "Tashreeb"],
@@ -144,6 +146,11 @@ export const DEMO: Record<string, MenuData> = {
     ],
     rating: { avg: 4.8, count: 127 },
   },
+  // القوالب ٧–١٦: معاينة كل منيو منسوخ على /odd-<key> بأقسامه وأصنافه وصورها
+  ...oddDemos(),
 };
 
-export const DEMO_LIST = Object.values(DEMO).map((m) => ({ slug: m.restaurant.slug, name: m.restaurant.name, color: m.restaurant.primary_color }));
+/** مطاعم العرض في مبدّل الواجهة — بلا نسخ القوالب (١٠ مطاعم تجريبية تزحم القائمة) */
+export const DEMO_LIST = Object.values(DEMO)
+  .filter((m) => !m.restaurant.slug.startsWith("odd-"))
+  .map((m) => ({ slug: m.restaurant.slug, name: m.restaurant.name, color: m.restaurant.primary_color }));
